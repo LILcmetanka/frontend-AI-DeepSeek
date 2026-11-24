@@ -1,5 +1,5 @@
-import axios, { type InternalAxiosRequestConfig } from 'axios';
-import { getAccessToken, refreshAccessToken } from '@/shared/lib/auth';
+import axios, { type InternalAxiosRequestConfig } from "axios";
+import { getAccessToken, refreshAccessToken } from "@/shared/lib/auth";
 
 /**
  * Единственный axios-инстанс для всего приложения.
@@ -12,7 +12,7 @@ import { getAccessToken, refreshAccessToken } from '@/shared/lib/auth';
  * refresh_token на /auth/refresh и не примет Set-Cookie от шлюза.
  */
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080',
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080",
   timeout: 15_000,
   withCredentials: true,
 });
@@ -32,7 +32,7 @@ interface RetriableConfig extends InternalAxiosRequestConfig {
 
 /** Методы входа: на их 401 обновлять нечего — это неверный код, а не сессия. */
 function isAuthEndpoint(url: string | undefined): boolean {
-  return typeof url === 'string' && url.startsWith('/auth/');
+  return typeof url === "string" && url.startsWith("/auth/");
 }
 
 api.interceptors.response.use(
@@ -80,7 +80,7 @@ export interface GameDto {
 
 export interface TaskStatusDto {
   taskId: string;
-  state: 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'ERROR';
+  state: "PENDING" | "PROCESSING" | "SUCCESS" | "ERROR";
   gameId?: string;
   result?: string;
   errorCode?: string;
@@ -96,7 +96,7 @@ export async function getGame(gameId: string): Promise<GameDto> {
   return data;
 }
 
-export type FeedCategory = 'for_you' | 'new' | 'ai_picks';
+export type FeedCategory = "for_you" | "new" | "ai_picks";
 
 export interface FeedPage {
   games: GameDto[];
@@ -108,7 +108,7 @@ export async function getFeed(params: {
   cursor?: string;
   limit?: number;
 }): Promise<FeedPage> {
-  const { data } = await api.get<FeedPage>('/feed', {
+  const { data } = await api.get<FeedPage>("/feed", {
     params: {
       category: params.category,
       cursor: params.cursor || undefined,
@@ -117,7 +117,7 @@ export async function getFeed(params: {
   });
   return {
     games: Array.isArray(data.games) ? data.games : [],
-    nextCursor: data.nextCursor ?? '',
+    nextCursor: data.nextCursor ?? "",
   };
 }
 
@@ -126,7 +126,7 @@ export async function createTask(payload: {
   prompt: string;
   idempotencyKey?: string;
 }): Promise<{ taskId: string }> {
-  const { data } = await api.post<{ taskId: string }>('/generate', payload);
+  const { data } = await api.post<{ taskId: string }>("/generate", payload);
   return data;
 }
 
@@ -138,10 +138,10 @@ export async function getTask(taskId: string): Promise<TaskStatusDto> {
 export async function sendEvent(payload: {
   userId: string;
   gameId: string;
-  type: 'view' | 'play_start' | 'play_finish' | 'skip' | 'like';
+  type: "view" | "play_start" | "play_finish" | "skip" | "like";
   durationSec?: number;
 }): Promise<void> {
-  await api.post('/events', payload);
+  await api.post("/events", payload);
 }
 
 /** Текст ошибки для человека: сообщение шлюза, иначе общая фраза. */
@@ -152,9 +152,68 @@ export function errorMessage(error: unknown): string {
       return detail;
     }
     if (error.response?.status === 501) {
-      return 'Лента пока недоступна: в контракте нет метода выдачи.';
+      return "Лента пока недоступна: в контракте нет метода выдачи.";
     }
-    return `Ошибка запроса (${error.response?.status ?? 'сеть'})`;
+    return `Ошибка запроса (${error.response?.status ?? "сеть"})`;
   }
-  return 'Неизвестная ошибка';
+  return "Неизвестная ошибка";
+}
+
+/**
+ * NF_015: состояние задачи — по-русски. Шлюз отдаёт машинные PENDING/
+ * PROCESSING/SUCCESS/ERROR, подписи делает интерфейс.
+ */
+export function taskStateLabel(
+  state: TaskStatusDto["state"] | undefined,
+): string {
+  switch (state) {
+    case "PENDING":
+      return "В очереди";
+    case "PROCESSING":
+      return "Генерируется";
+    case "SUCCESS":
+      return "Готово";
+    case "ERROR":
+      return "Ошибка";
+    default:
+      return "…";
+  }
+}
+
+/**
+ * NF_015: ошибка задачи по-русски. Текст оркестратора английский и
+ * технический (правила Zod, коды апстримов) — показывать его пользователю
+ * нельзя, поэтому переводим по `errorCode`, а не по сообщению.
+ */
+export function taskErrorMessage(
+  code: string | undefined,
+  message?: string,
+): string {
+  switch (code) {
+    case "INVALID_INPUT":
+      return "Запрос не прошёл проверку. Проверьте сообщение и игру.";
+    case "MODERATION_REJECTED":
+      return "Сообщение отклонено модерацией. Перефразируйте запрос.";
+    case "IDEMPOTENCY_CONFLICT":
+      return "Этот запрос уже отправлялся с другим содержимым. Поменяйте запрос.";
+    case "TEMPLATE_NOT_FOUND":
+      return "Шаблон игры не найден.";
+    case "INVALID_MANIFEST":
+      return "Шаблон игры повреждён: ИИ вернул неверную структуру.";
+    case "AI_REFUSED":
+      return "ИИ отказался менять игру. Попробуйте переформулировать.";
+    case "CONFIG_SERVICE_FAILED":
+    case "ASSET_SERVICE_FAILED":
+    case "ASSET_GENERATOR_FAILED":
+      return "Сервис генерации не справился. Попробуйте ещё раз.";
+    case "SAVE_GAME_FAILED":
+      return "Игра сгенерирована, но не сохранилась в ленте. Мы уже разбираемся.";
+    case "TIMEOUT":
+      return "Генерация заняла слишком много времени. Попробуйте ещё раз.";
+    case "INTERNAL":
+      return "Внутренняя ошибка генерации. Попробуйте позже.";
+    default:
+      // Кода нет — показываем общую фразу и код, если он есть.
+      return message ? `Ошибка генерации (${message})` : "Ошибка генерации.";
+  }
 }

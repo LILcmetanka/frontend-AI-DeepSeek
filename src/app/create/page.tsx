@@ -1,9 +1,15 @@
-'use client';
+"use client";
 
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
-import { createTask, errorMessage, getTask } from '@/shared/api/axios-instance';
-import { RequireAuth } from '@/shared/lib/require-auth';
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  createTask,
+  errorMessage,
+  getTask,
+  taskErrorMessage,
+  taskStateLabel,
+} from "@/shared/api/axios-instance";
+import { RequireAuth } from "@/shared/lib/require-auth";
 
 /**
  * AI Studio: сообщение «сделай игру быстрее» → задача → статус → итог.
@@ -24,18 +30,18 @@ const PROMPT_ALPHABET =
   /^[\p{Script=Cyrillic}\p{Script=Latin}0-9.,:;!?\-–—()«»"'%+=/№ \t\n\r]*$/u;
 
 function promptProblem(value: string): string | null {
-  const trimmed = value.replace(/^[ \t\r\n]+|[ \t\r\n]+$/g, '');
-  if (trimmed.length === 0) return 'Сообщение не может быть пустым';
-  if (trimmed.length > 1500) return 'Не больше 1500 символов';
+  const trimmed = value.replace(/^[ \t\r\n]+|[ \t\r\n]+$/g, "");
+  if (trimmed.length === 0) return "Сообщение не может быть пустым";
+  if (trimmed.length > 1500) return "Не больше 1500 символов";
   if (!PROMPT_ALPHABET.test(trimmed)) {
-    return 'Только русские и латинские буквы, цифры и знаки . , : ; ! ? - – — ( ) « » " \' % + = / №';
+    return "Только русские и латинские буквы, цифры и знаки . , : ; ! ? - – — ( ) « » \" ' % + = / №";
   }
   return null;
 }
 
 function CreateContent() {
-  const [gameId, setGameId] = useState('');
-  const [prompt, setPrompt] = useState('');
+  const [gameId, setGameId] = useState("");
+  const [prompt, setPrompt] = useState("");
   const [promptError, setPromptError] = useState<string | null>(null);
   const [taskId, setTaskId] = useState<string | null>(null);
 
@@ -50,12 +56,12 @@ function CreateContent() {
   });
 
   const task = useQuery({
-    queryKey: ['task', taskId],
+    queryKey: ["task", taskId],
     queryFn: () => getTask(taskId as string),
     enabled: taskId !== null,
     refetchInterval: (query) => {
       const state = query.state.data?.state;
-      return state === 'SUCCESS' || state === 'ERROR' ? false : 2000;
+      return state === "SUCCESS" || state === "ERROR" ? false : 2000;
     },
   });
 
@@ -63,8 +69,8 @@ function CreateContent() {
     <section className="space-y-6">
       <h1 className="text-2xl font-semibold">AI Studio</h1>
       <p className="max-w-2xl text-sm text-zinc-400">
-        Опишите, что поменять в игре. ИИ меняет только конфиг и ассеты,
-        механика шаблона остаётся прежней.
+        Опишите, что поменять в игре. ИИ меняет только конфиг и ассеты, механика
+        шаблона остаётся прежней.
       </p>
 
       <form
@@ -110,7 +116,7 @@ function CreateContent() {
           disabled={create.isPending}
           className="rounded bg-emerald-500 px-4 py-2 font-medium text-zinc-950 disabled:opacity-50"
         >
-          {create.isPending ? 'Отправляем…' : 'Сгенерировать'}
+          {create.isPending ? "Отправляем…" : "Сгенерировать"}
         </button>
       </form>
 
@@ -126,15 +132,19 @@ function CreateContent() {
             Задача <code className="text-emerald-400">{taskId}</code>
           </p>
           <p>
-            Состояние:{' '}
-            <span className="font-medium">{task.data?.state ?? '…'}</span>
+            Состояние:{" "}
+            <span className="font-medium">
+              {taskStateLabel(task.data?.state)}
+            </span>
           </p>
-          {task.data?.errorMessage && (
-            <p className="text-red-300">{task.data.errorMessage}</p>
+          {task.data?.state === "ERROR" && (
+            <p className="text-red-300">
+              {taskErrorMessage(task.data.errorCode, task.data.errorMessage)}
+            </p>
           )}
           {task.data?.gameId && (
             <p>
-              Игра:{' '}
+              Игра:{" "}
               <a
                 className="text-emerald-400"
                 href={`/feed/${task.data.gameId}`}
