@@ -82,7 +82,7 @@ function CreateContent() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">AI Studio</h1>
+      <h1 className="text-xl font-semibold sm:text-2xl">AI Studio</h1>
       <p className="max-w-2xl text-sm text-zinc-400">
         Опишите, что поменять в игре. ИИ меняет только конфиг и ассеты, механика
         шаблона остаётся прежней.

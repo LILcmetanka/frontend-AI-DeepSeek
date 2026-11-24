@@ -277,7 +277,7 @@ export function GamePlayer({
         ref={frameRef}
         src={`${gameUrl}?embed=1&gameId=${encodeURIComponent(gameId)}&userId=${encodeURIComponent(userId)}`}
         title="Игра"
-        className="h-[70vh] min-h-[420px] w-full"
+        className="h-[60vh] min-h-[320px] w-full sm:h-[70vh] sm:min-h-[420px]"
         onLoad={() => {
           // Страховка, если ready пришёл раньше, чем мы повесили обработчик.
           postMount();

@@ -79,7 +79,7 @@ export default function FeedPage() {
   return (
     <section className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-semibold">Лента</h1>
+        <h1 className="text-xl font-semibold sm:text-2xl">Лента</h1>
         <div className="ml-auto flex gap-1 rounded border border-zinc-800 p-1 text-sm">
           {CATEGORIES.map((item) => (
             <button
@@ -162,7 +162,7 @@ export default function FeedPage() {
             value={gameId}
             onChange={(event) => setGameId(event.target.value)}
             placeholder="UUID игры"
-            className="w-80 rounded border border-zinc-700 bg-zinc-900 px-3 py-2"
+            className="w-full max-w-xs rounded border border-zinc-700 bg-zinc-900 px-3 py-2 sm:w-80"
           />
         </label>
         <button className="rounded bg-emerald-500 px-4 py-2 font-medium text-zinc-950">

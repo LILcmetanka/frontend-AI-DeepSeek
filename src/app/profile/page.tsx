@@ -46,7 +46,7 @@ function ProfileContent() {
 
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">Профиль</h1>
+      <h1 className="text-xl font-semibold sm:text-2xl">Профиль</h1>
 
       {me.isLoading && <p className="text-zinc-400">Загружаем…</p>}
 
