@@ -3,15 +3,25 @@
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { api, errorMessage } from '@/shared/api/axios-instance';
+import { RequireAuth } from '@/shared/lib/require-auth';
 
 interface MeDto {
   id: string;
   username?: string | null;
   name?: string | null;
   email?: string | null;
+  phone?: string | null;
 }
 
 export default function ProfilePage() {
+  return (
+    <RequireAuth>
+      <ProfileContent />
+    </RequireAuth>
+  );
+}
+
+function ProfileContent() {
   const me = useQuery({
     queryKey: ['me'],
     queryFn: async () => {
@@ -51,6 +61,10 @@ export default function ProfilePage() {
           <div className="flex gap-3">
             <dt className="w-28 text-zinc-400">Email</dt>
             <dd>{me.data.email ?? '—'}</dd>
+          </div>
+          <div className="flex gap-3">
+            <dt className="w-28 text-zinc-400">Телефон</dt>
+            <dd>{me.data.phone ?? '—'}</dd>
           </div>
         </dl>
       )}

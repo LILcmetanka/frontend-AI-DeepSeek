@@ -1,4 +1,5 @@
-import axios from 'axios';
+import axios, { type InternalAxiosRequestConfig } from 'axios';
+import { getAccessToken, refreshAccessToken } from '@/shared/lib/auth';
 
 /**
  * Единственный axios-инстанс для всего приложения.
@@ -6,21 +7,63 @@ import axios from 'axios';
  * База — NEXT_PUBLIC_API_URL (по умолчанию http://localhost:8080, шлюз).
  * Токен доступа берём из localStorage: refresh-куку ставит шлюз, а доступ
  * живёт в памяти вкладки — так проще, чем тащить cookie в SSR.
+ *
+ * withCredentials обязателен: без него браузер не отправит HttpOnly-куку
+ * refresh_token на /auth/refresh и не примет Set-Cookie от шлюза.
  */
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080',
   timeout: 15_000,
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = window.localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+  const token = getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+/** Запрос, который уже пробовали повторить после refresh. */
+interface RetriableConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+
+/** Методы входа: на их 401 обновлять нечего — это неверный код, а не сессия. */
+function isAuthEndpoint(url: string | undefined): boolean {
+  return typeof url === 'string' && url.startsWith('/auth/');
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error: unknown) => {
+    if (!axios.isAxiosError(error)) return Promise.reject(error);
+
+    const config = error.config as RetriableConfig | undefined;
+    const status = error.response?.status;
+
+    // 401 один раз: обновляем access по куке и повторяем исходный запрос.
+    // Если refresh не удался — отдаём исходную ошибку, а маршрут увезёт
+    // пользователя на /login (RequireAuth).
+    if (
+      status !== 401 ||
+      !config ||
+      config._retry ||
+      isAuthEndpoint(config.url)
+    ) {
+      return Promise.reject(error);
+    }
+
+    config._retry = true;
+
+    const token = await refreshAccessToken();
+    if (!token) return Promise.reject(error);
+
+    config.headers.Authorization = `Bearer ${token}`;
+    return api(config);
+  },
+);
 
 export interface GameDto {
   gameId: string;

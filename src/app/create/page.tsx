@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { createTask, errorMessage, getTask } from '@/shared/api/axios-instance';
+import { RequireAuth } from '@/shared/lib/require-auth';
 
 /**
  * AI Studio: сообщение «сделай игру быстрее» → задача → статус → итог.
@@ -10,6 +11,14 @@ import { createTask, errorMessage, getTask } from '@/shared/api/axios-instance';
  * по GET /generate/{taskId} (orchestrator.CheckGameState).
  */
 export default function CreatePage() {
+  return (
+    <RequireAuth>
+      <CreateContent />
+    </RequireAuth>
+  );
+}
+
+function CreateContent() {
   const [gameId, setGameId] = useState('');
   const [prompt, setPrompt] = useState('');
   const [taskId, setTaskId] = useState<string | null>(null);

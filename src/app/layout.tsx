@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import './globals.css';
+import { AuthNav } from '@/shared/lib/auth-nav';
 import { QueryProvider } from '@/shared/lib/query-provider';
 
 export const metadata: Metadata = {
@@ -34,6 +35,7 @@ export default function RootLayout({
                   {item.label}
                 </Link>
               ))}
+              <AuthNav />
             </nav>
           </header>
           <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
