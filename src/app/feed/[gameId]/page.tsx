@@ -78,6 +78,11 @@ export default function GamePage({
 
       {GAME_URL ? (
         <GamePlayer
+          onReady={(readyMs) => {
+            // NF_0001: замер готовности виден в консоли; сравнение с порогом
+            // 1000/3000 мс — по нему и проверяем ТЗ.
+            console.info(`[NF_0001] игра готова за ${readyMs} мс`);
+          }}
           gameId={data.gameId}
           userId={data.authorId}
           config={data.config}

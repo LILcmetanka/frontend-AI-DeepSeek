@@ -85,6 +85,12 @@ export function messageTargetOrigin(gameUrl: string): string {
   }
 }
 
+/**
+ * NF_0001: время от появления плеера на экране до готовности игры — не более
+ * 1 с, если шаблон уже в кэше браузера, и не более 3 с при первой загрузке.
+ * Замер снимаем здесь и отдаём наружу: странице — для лога/метрик, тесту —
+ * через `data-ready-ms` на контейнере.
+ */
 export interface GamePlayerProps {
   gameId: string;
   userId: string;
@@ -95,6 +101,8 @@ export interface GamePlayerProps {
   /** База S3/CDN для относительных путей спрайтов. */
   spriteBaseUrl?: string;
   onEvent: (event: PlayerEvent) => void;
+  /** Вызывается один раз после `hookster:mount` с замером готовности. */
+  onReady?: (readyMs: number) => void;
 }
 
 export function GamePlayer({
@@ -104,9 +112,39 @@ export function GamePlayer({
   gameUrl,
   spriteBaseUrl,
   onEvent,
+  onReady,
 }: GamePlayerProps) {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [ready, setReady] = useState(false);
+  const [readyMs, setReadyMs] = useState<number | null>(null);
+  // Точка отсчёта — первый рендер плеера: «появление мини-игры на экране».
+  const startedAtRef = useRef<number>(
+    typeof performance !== 'undefined' ? performance.now() : 0,
+  );
+  const onReadyRef = useRef(onReady);
+  useEffect(() => {
+    onReadyRef.current = onReady;
+  }, [onReady]);
+
+  /** Снимает замер один раз; повторный ready (перезагрузка iframe) не считается. */
+  const markReady = useCallback(() => {
+    if (typeof performance === 'undefined') return;
+    const elapsed = performance.now() - startedAtRef.current;
+    setReadyMs((previous) => {
+      if (previous !== null) return previous;
+      try {
+        const start = startedAtRef.current;
+        performance.measure('hookster:game-ready', {
+          start,
+          end: start + elapsed,
+        });
+      } catch {
+        // performance.measure не критичен: замер уже посчитан вручную.
+      }
+      onReadyRef.current?.(Math.round(elapsed));
+      return Math.round(elapsed);
+    });
+  }, []);
 
   // Колбэк держим в ref: пересоздание функции страницы не должно
   // перевешивать обработчик message и слать mount заново.
@@ -148,6 +186,7 @@ export function GamePlayer({
       if (type === 'hookster:ready') {
         setReady(true);
         postMount();
+        markReady();
         return;
       }
       if (type === 'hookster:event') {
@@ -158,10 +197,13 @@ export function GamePlayer({
 
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
-  }, [postMount]);
+  }, [postMount, markReady]);
 
   return (
-    <div className="relative w-full overflow-hidden rounded border border-zinc-800 bg-black">
+    <div
+      className="relative w-full overflow-hidden rounded border border-zinc-800 bg-black"
+      data-ready-ms={readyMs ?? ''}
+    >
       <iframe
         ref={frameRef}
         src={`${gameUrl}?embed=1&gameId=${encodeURIComponent(gameId)}&userId=${encodeURIComponent(userId)}`}
