@@ -6,13 +6,13 @@ import { useState } from "react";
 import {
   createTask,
   errorMessage,
-  getGame,
   getTask,
   sendEvent,
   taskErrorMessage,
   taskStateLabel,
   type GameDto,
 } from "@/shared/api/axios-instance";
+import { getGameCached } from "@/shared/lib/game-cache";
 import { GamePlayer, type PlayerEvent } from "@/shared/lib/game-player";
 import { RequireAuth } from "@/shared/lib/require-auth";
 
@@ -189,7 +189,7 @@ function CreateContent() {
 function ResultGame({ gameId }: { gameId: string }) {
   const game = useQuery({
     queryKey: ['game', gameId],
-    queryFn: () => getGame(gameId),
+    queryFn: () => getGameCached(gameId),
     retry: false,
     staleTime: 30_000,
   });

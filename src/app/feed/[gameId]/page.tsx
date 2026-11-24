@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { use, useCallback } from 'react';
 import {
   errorMessage,
-  getGame,
   sendEvent,
   type GameDto,
 } from '@/shared/api/axios-instance';
+import { getGameCached } from '@/shared/lib/game-cache';
 import { GamePlayer, type PlayerEvent } from '@/shared/lib/game-player';
 
 // Адреса вшиваются в бандл при сборке: это NEXT_PUBLIC_*, браузер ходит
@@ -23,9 +23,11 @@ export default function GamePage({
 }) {
   const { gameId } = use(params);
 
+  // FU_0007: сначала локальная копия шаблона, на сервер — если её нет
+  // или она устарела. Ключ тот же, что у prefetch в ленте.
   const game = useQuery({
     queryKey: ['game', gameId],
-    queryFn: () => getGame(gameId),
+    queryFn: () => getGameCached(gameId),
     retry: false,
   });
 
