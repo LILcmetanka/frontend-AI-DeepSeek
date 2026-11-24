@@ -229,6 +229,7 @@ function ResultGame({ gameId }: { gameId: string }) {
           config={data.config}
           gameUrl={GAME_URL}
           spriteBaseUrl={SPRITE_BASE_URL}
+          engineMinVersion={data.engineMinVersion}
           onEvent={handleEvent}
           onReady={(readyMs) => {
             console.info(`[NF_0001] игра готова за ${readyMs} мс`);

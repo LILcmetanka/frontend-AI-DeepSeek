@@ -19,6 +19,14 @@ export interface PlayerEvent {
   distance?: number;
 }
 
+/**
+ * Версия движка, вшитая в сборку плеера. Игру, которой нужен более новый
+ * движок, не запускаем — иначе она упадёт непонятной ошибкой (NF_0010).
+ * Меняется вместе с версией образа SubwaySurf.
+ */
+export const DEFAULT_ENGINE_VERSION =
+  (process.env.NEXT_PUBLIC_ENGINE_VERSION ?? '1.0.0').trim() || '1.0.0';
+
 const RUNNER_SOURCE = 'hookster-runner';
 const PLATFORM_SOURCE = 'hookster-web';
 const PLAY_EVENT_TYPES: readonly PlayEventType[] = [
@@ -76,6 +84,47 @@ export function parseGameConfig(raw: string): Record<string, unknown> | null {
   }
 }
 
+/**
+ * NF_0010: конфиг игры помнит версию шаблона, а шаблон — минимальную версию
+ * движка (`engine_min_version`). Сравниваем посегментно: версии в формате
+ * `X.Y.Z`, строковое сравнение дало бы «1.10.0» < «1.9.0».
+ *
+ * Возвращает -1, 0, 1; null — версия не разобрана (тогда игру не блокируем).
+ */
+export function compareSemver(a: string, b: string): number | null {
+  const parse = (value: string): number[] | null => {
+    const parts = value.trim().replace(/^v/, '').split('.');
+    if (parts.length === 0) return null;
+    const numbers = parts.map((part) => Number.parseInt(part, 10));
+    if (numbers.some((n) => !Number.isInteger(n) || n < 0)) return null;
+    return numbers;
+  };
+
+  const left = parse(a);
+  const right = parse(b);
+  if (!left || !right) return null;
+
+  const length = Math.max(left.length, right.length);
+  for (let i = 0; i < length; i += 1) {
+    const l = left[i] ?? 0;
+    const r = right[i] ?? 0;
+    if (l > r) return 1;
+    if (l < r) return -1;
+  }
+  return 0;
+}
+
+/** Сможет ли движок версии `engineVersion` запустить игру (NF_0010). */
+export function isEngineCompatible(
+  engineVersion: string,
+  engineMinVersion: string,
+): boolean {
+  if (!engineMinVersion) return true;
+  const order = compareSemver(engineVersion, engineMinVersion);
+  // Непонятная версия — не блокируем: пустой экран хуже попытки запуска.
+  return order === null ? true : order >= 0;
+}
+
 /** Origin игры для postMessage: не отдаём mount всему интернету. */
 export function messageTargetOrigin(gameUrl: string): string {
   try {
@@ -100,6 +149,10 @@ export interface GamePlayerProps {
   gameUrl: string;
   /** База S3/CDN для относительных путей спрайтов. */
   spriteBaseUrl?: string;
+  /** Минимальная версия движка из карточки игры (NF_0010). */
+  engineMinVersion?: string;
+  /** Версия сборки движка, которую реально запускаем. */
+  engineVersion?: string;
   onEvent: (event: PlayerEvent) => void;
   /** Вызывается один раз после `hookster:mount` с замером готовности. */
   onReady?: (readyMs: number) => void;
@@ -111,6 +164,8 @@ export function GamePlayer({
   config,
   gameUrl,
   spriteBaseUrl,
+  engineMinVersion,
+  engineVersion = DEFAULT_ENGINE_VERSION,
   onEvent,
   onReady,
 }: GamePlayerProps) {
@@ -154,6 +209,10 @@ export function GamePlayer({
   }, [onEvent]);
 
   const parsedConfig = useMemo(() => parseGameConfig(config), [config]);
+  const compatible = useMemo(
+    () => isEngineCompatible(engineVersion, engineMinVersion ?? ''),
+    [engineVersion, engineMinVersion],
+  );
   const targetOrigin = useMemo(() => messageTargetOrigin(gameUrl), [gameUrl]);
 
   const postMount = useCallback(() => {
@@ -198,6 +257,16 @@ export function GamePlayer({
     window.addEventListener('message', handler);
     return () => window.removeEventListener('message', handler);
   }, [postMount, markReady]);
+
+  // NF_0010: несовместимый шаблон — понятный отказ вместо пустого iframe.
+  if (!compatible) {
+    return (
+      <div className="rounded border border-amber-700 bg-amber-950/40 p-4 text-sm text-amber-200">
+        Игра собрана для более нового движка ({engineMinVersion}), а у нас{' '}
+        {engineVersion}. Обновите страницу позже — мы обновляем движок.
+      </div>
+    );
+  }
 
   return (
     <div

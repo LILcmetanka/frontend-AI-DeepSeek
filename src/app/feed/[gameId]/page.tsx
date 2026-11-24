@@ -88,6 +88,7 @@ export default function GamePage({
           config={data.config}
           gameUrl={GAME_URL}
           spriteBaseUrl={SPRITE_BASE_URL}
+          engineMinVersion={data.engineMinVersion}
           onEvent={handlePlayerEvent}
         />
       ) : (
