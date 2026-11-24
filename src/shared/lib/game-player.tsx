@@ -1,0 +1,182 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+/**
+ * Плеер игры: SubwaySurf в iframe + мост postMessage.
+ *
+ * Игра присылает `hookster:ready`, платформа отвечает `hookster:mount`
+ * с конфигом игры и базой спрайтов, дальше игра шлёт `hookster:event`
+ * (play_start / play_finish / skip). Протокол — SubwaySurf/docs/EMBED.md.
+ */
+
+export type PlayEventType = 'play_start' | 'play_finish' | 'skip';
+
+export interface PlayerEvent {
+  type: PlayEventType;
+  durationSec?: number;
+  score?: number;
+  distance?: number;
+}
+
+const RUNNER_SOURCE = 'hookster-runner';
+const PLATFORM_SOURCE = 'hookster-web';
+const PLAY_EVENT_TYPES: readonly PlayEventType[] = [
+  'play_start',
+  'play_finish',
+  'skip',
+];
+
+/** Сообщение игры наружу. Поля необязательные: набор зависит от события. */
+interface RunnerMessage {
+  source?: unknown;
+  type?: unknown;
+  event?: unknown;
+  durationSec?: unknown;
+  score?: unknown;
+  distance?: unknown;
+}
+
+/** Проверка «это событие сеанса известного типа». */
+export function isPlayerEvent(data: unknown): data is PlayerEvent {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
+  const message = data as RunnerMessage;
+  return (
+    typeof message.event === 'string' &&
+    (PLAY_EVENT_TYPES as readonly string[]).includes(message.event)
+  );
+}
+
+/** Ограничение числа: в событие не должен уйти NaN или Infinity. */
+function finiteOrUndefined(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+/** Событие игры → PlayerEvent. Неизвестное/битое — null. */
+export function toPlayerEvent(data: unknown): PlayerEvent | null {
+  if (!isPlayerEvent(data)) return null;
+  const message = data as RunnerMessage;
+  return {
+    type: message.event as PlayEventType,
+    durationSec: finiteOrUndefined(message.durationSec),
+    score: finiteOrUndefined(message.score),
+    distance: finiteOrUndefined(message.distance),
+  };
+}
+
+/** Конфиг игры в DTO приходит строкой JSON; битый — null (игра на дефолтах). */
+export function parseGameConfig(raw: string): Record<string, unknown> | null {
+  if (typeof raw !== 'string' || raw.trim() === '') return null;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    return parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+/** Origin игры для postMessage: не отдаём mount всему интернету. */
+export function messageTargetOrigin(gameUrl: string): string {
+  try {
+    return new URL(gameUrl).origin;
+  } catch {
+    return '*';
+  }
+}
+
+export interface GamePlayerProps {
+  gameId: string;
+  userId: string;
+  /** Конфиг игры строкой JSON — как в GameDto.config. */
+  config: string;
+  /** Адрес сборки SubwaySurf, например http://localhost:8081. */
+  gameUrl: string;
+  /** База S3/CDN для относительных путей спрайтов. */
+  spriteBaseUrl?: string;
+  onEvent: (event: PlayerEvent) => void;
+}
+
+export function GamePlayer({
+  gameId,
+  userId,
+  config,
+  gameUrl,
+  spriteBaseUrl,
+  onEvent,
+}: GamePlayerProps) {
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const [ready, setReady] = useState(false);
+
+  // Колбэк держим в ref: пересоздание функции страницы не должно
+  // перевешивать обработчик message и слать mount заново.
+  const onEventRef = useRef(onEvent);
+  useEffect(() => {
+    onEventRef.current = onEvent;
+  }, [onEvent]);
+
+  const parsedConfig = useMemo(() => parseGameConfig(config), [config]);
+  const targetOrigin = useMemo(() => messageTargetOrigin(gameUrl), [gameUrl]);
+
+  const postMount = useCallback(() => {
+    const frame = frameRef.current;
+    if (!frame?.contentWindow) return;
+    frame.contentWindow.postMessage(
+      {
+        source: PLATFORM_SOURCE,
+        type: 'hookster:mount',
+        gameId,
+        userId,
+        spriteBaseUrl: spriteBaseUrl ?? '',
+        config: parsedConfig,
+      },
+      targetOrigin,
+    );
+  }, [gameId, userId, spriteBaseUrl, parsedConfig, targetOrigin]);
+
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      const frame = frameRef.current;
+      // Только сообщения из нашего iframe: чужие окна игнорируем.
+      if (!frame || event.source !== frame.contentWindow) return;
+
+      const data: unknown = event.data;
+      if (!data || typeof data !== 'object' || Array.isArray(data)) return;
+      if ((data as RunnerMessage).source !== RUNNER_SOURCE) return;
+
+      const type = (data as RunnerMessage).type;
+      if (type === 'hookster:ready') {
+        setReady(true);
+        postMount();
+        return;
+      }
+      if (type === 'hookster:event') {
+        const parsed = toPlayerEvent(data);
+        if (parsed) onEventRef.current(parsed);
+      }
+    };
+
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [postMount]);
+
+  return (
+    <div className="relative w-full overflow-hidden rounded border border-zinc-800 bg-black">
+      <iframe
+        ref={frameRef}
+        src={`${gameUrl}?embed=1&gameId=${encodeURIComponent(gameId)}&userId=${encodeURIComponent(userId)}`}
+        title="Игра"
+        className="h-[70vh] min-h-[420px] w-full"
+        onLoad={() => {
+          // Страховка, если ready пришёл раньше, чем мы повесили обработчик.
+          postMount();
+        }}
+      />
+      {!ready && (
+        <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-zinc-400">
+          Загружаем игру…
+        </p>
+      )}
+    </div>
+  );
+}
