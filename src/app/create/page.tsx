@@ -18,9 +18,25 @@ export default function CreatePage() {
   );
 }
 
+// IN_0001: клиент не отправляет сообщение вне алфавита M. Сервер проверяет
+// то же самое, но лишний круг до модели и ошибка 400 пользователю не нужны.
+const PROMPT_ALPHABET =
+  /^[\p{Script=Cyrillic}\p{Script=Latin}0-9.,:;!?\-–—()«»"'%+=/№ \t\n\r]*$/u;
+
+function promptProblem(value: string): string | null {
+  const trimmed = value.replace(/^[ \t\r\n]+|[ \t\r\n]+$/g, '');
+  if (trimmed.length === 0) return 'Сообщение не может быть пустым';
+  if (trimmed.length > 1500) return 'Не больше 1500 символов';
+  if (!PROMPT_ALPHABET.test(trimmed)) {
+    return 'Только русские и латинские буквы, цифры и знаки . , : ; ! ? - – — ( ) « » " \' % + = / №';
+  }
+  return null;
+}
+
 function CreateContent() {
   const [gameId, setGameId] = useState('');
   const [prompt, setPrompt] = useState('');
+  const [promptError, setPromptError] = useState<string | null>(null);
   const [taskId, setTaskId] = useState<string | null>(null);
 
   const create = useMutation({
@@ -55,6 +71,12 @@ function CreateContent() {
         className="space-y-4"
         onSubmit={(event) => {
           event.preventDefault();
+          const problem = promptProblem(prompt);
+          if (problem) {
+            setPromptError(problem);
+            return;
+          }
+          setPromptError(null);
           create.mutate();
         }}
       >
@@ -75,9 +97,13 @@ function CreateContent() {
             maxLength={1500}
             rows={4}
             value={prompt}
-            onChange={(event) => setPrompt(event.target.value)}
+            onChange={(event) => {
+              setPrompt(event.target.value);
+              if (promptError) setPromptError(null);
+            }}
             className="w-full max-w-lg rounded border border-zinc-700 bg-zinc-900 px-3 py-2"
           />
+          {promptError && <span className="text-red-300">{promptError}</span>}
         </label>
 
         <button
