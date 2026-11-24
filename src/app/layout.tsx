@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import './globals.css';
+import { AuthNav } from '@/shared/lib/auth-nav';
 import { QueryProvider } from '@/shared/lib/query-provider';
 
 export const metadata: Metadata = {
@@ -23,7 +24,9 @@ export default function RootLayout({
       <body className="min-h-screen bg-zinc-950 text-zinc-100">
         <QueryProvider>
           <header className="border-b border-zinc-800">
-            <nav className="mx-auto flex max-w-5xl gap-6 px-4 py-4 text-sm">
+            {/* NF_013: mobile-first — на узком экране шапка переносится,
+                а не выдавливает «Выйти» за экран. */}
+            <nav className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-3 py-3 text-sm sm:gap-x-6 sm:px-4 sm:py-4">
               <span className="font-semibold text-emerald-400">Hookster</span>
               {nav.map((item) => (
                 <Link
@@ -34,9 +37,12 @@ export default function RootLayout({
                   {item.label}
                 </Link>
               ))}
+              <AuthNav />
             </nav>
           </header>
-          <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+          <main className="mx-auto max-w-5xl px-3 py-5 sm:px-4 sm:py-8">
+            {children}
+          </main>
         </QueryProvider>
       </body>
     </html>
