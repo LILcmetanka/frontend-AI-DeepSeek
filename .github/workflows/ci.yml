@@ -1,0 +1,37 @@
+name: CI
+
+# Линт, проверка типов и сборка Next.js. Зависимостей на приватные
+# репозитории нет, поэтому токены не нужны.
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Установка зависимостей
+        run: npm ci --no-audit --fund=false
+
+      - name: Линт
+        run: npm run lint
+
+      - name: Типы
+        run: npm run typecheck
+
+      - name: Сборка
+        run: npm run build

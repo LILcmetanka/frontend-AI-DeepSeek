@@ -1,0 +1,22 @@
+# Зависимости и сборка
+node_modules/
+.next/
+out/
+coverage/
+
+# Локальное окружение
+.env
+.env.local
+.env.*.local
+
+# Редакторы и ОС
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Next.js
+next-env.d.ts
+
+# локальные копии README
+README.old.md
