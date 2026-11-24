@@ -121,6 +121,46 @@ export async function getFeed(params: {
   };
 }
 
+/** FU_0026: игры автора из токена — отдельный маршрут, а не лента. */
+export async function getMyGames(params: {
+  cursor?: string;
+  limit?: number;
+}): Promise<FeedPage> {
+  const { data } = await api.get<FeedPage>('/profile/me/games', {
+    params: {
+      cursor: params.cursor || undefined,
+      limit: params.limit ?? 10,
+    },
+  });
+  return {
+    games: Array.isArray(data.games) ? data.games : [],
+    nextCursor: data.nextCursor ?? '',
+  };
+}
+
+/**
+ * FU_0028: id понравившихся игр. Шлюз отдаёт только id — карточки берём
+ * по одной через getGame: список лайков живёт в profile-service, а игра —
+ * в delivery.
+ */
+export async function getLikedGameIds(limit = 50): Promise<string[]> {
+  const { data } = await api.get<string[] | null>('/likes', {
+    params: { limit, offset: 0 },
+  });
+  return Array.isArray(data) ? data : [];
+}
+
+/** Карточки по id: битые/удалённые игры пропускаем, лента не должна падать. */
+export async function getGamesByIds(ids: string[]): Promise<GameDto[]> {
+  const results = await Promise.allSettled(ids.map((id) => getGame(id)));
+  return results
+    .filter(
+      (result): result is PromiseFulfilledResult<GameDto> =>
+        result.status === 'fulfilled',
+    )
+    .map((result) => result.value);
+}
+
 export async function createTask(payload: {
   gameId: string;
   prompt: string;
