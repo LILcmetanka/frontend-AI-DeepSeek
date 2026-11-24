@@ -1,12 +1,13 @@
 'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   errorMessage,
   getFeed,
+  getGame,
   type FeedCategory,
   type GameDto,
 } from '@/shared/api/axios-instance';
@@ -24,6 +25,7 @@ const CATEGORIES: Array<{ id: FeedCategory; label: string }> = [
  */
 export default function FeedPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [category, setCategory] = useState<FeedCategory>('for_you');
   const [gameId, setGameId] = useState('');
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -52,8 +54,27 @@ export default function FeedPage() {
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage, category]);
 
-  const games: GameDto[] =
-    feed.data?.pages.flatMap((page) => page.games) ?? [];
+  const games: GameDto[] = useMemo(
+    () => feed.data?.pages.flatMap((page) => page.games) ?? [],
+    [feed.data?.pages],
+  );
+
+  // NF_0002: клиент заранее загружает не менее двух следующих игр. Каждый
+  // prefetch кладёт карточку в тот же ключ ['game', id], что читает страница
+  // игры, поэтому переход открывается из кэша, без запроса. Грузим все
+  // карточки текущей выдачи: их 10–20, а «следующие два» тогда есть от любой.
+  const prefetchedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    for (const game of games) {
+      if (prefetchedRef.current.has(game.gameId)) continue;
+      prefetchedRef.current.add(game.gameId);
+      void queryClient.prefetchQuery({
+        queryKey: ['game', game.gameId],
+        queryFn: () => getGame(game.gameId),
+        staleTime: 60_000,
+      });
+    }
+  }, [games, queryClient]);
 
   return (
     <section className="space-y-6">
