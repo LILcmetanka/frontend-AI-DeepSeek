@@ -1,60 +1,133 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { api, errorMessage } from '@/shared/api/axios-instance';
+import { useEffect, useRef, useState } from 'react';
+import {
+  errorMessage,
+  getFeed,
+  type FeedCategory,
+  type GameDto,
+} from '@/shared/api/axios-instance';
 
-interface FeedItem {
-  gameId: string;
-  title: string;
-}
+const CATEGORIES: Array<{ id: FeedCategory; label: string }> = [
+  { id: 'for_you', label: 'Для вас' },
+  { id: 'new', label: 'Новые' },
+  { id: 'ai_picks', label: 'Выбор ИИ' },
+];
 
 /**
- * Лента. Пока в контракте delivery нет GetFeed, шлюз отвечает 501 —
- * показываем это честно и даём открыть игру по id (например, из AI Studio).
+ * Лента: вертикальный список игр, следующая страница подгружается, когда
+ * доходишь до конца. Это не полноэкранный свайп из ТЗ (CL_0001): подгрузка
+ * есть, сам жест — отдельная задача.
  */
 export default function FeedPage() {
   const router = useRouter();
+  const [category, setCategory] = useState<FeedCategory>('for_you');
   const [gameId, setGameId] = useState('');
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const feed = useQuery({
-    queryKey: ['feed'],
-    queryFn: async () => {
-      const { data } = await api.get<{ items: FeedItem[] }>('/feed');
-      return data;
-    },
+  const feed = useInfiniteQuery({
+    queryKey: ['feed', category],
+    queryFn: ({ pageParam }) =>
+      getFeed({ category, cursor: pageParam, limit: 10 }),
+    initialPageParam: '',
+    getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
     retry: false,
   });
 
+  const { fetchNextPage, hasNextPage, isFetchingNextPage } = feed;
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return undefined;
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting) && hasNextPage) {
+        void fetchNextPage();
+      }
+    });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, category]);
+
+  const games: GameDto[] =
+    feed.data?.pages.flatMap((page) => page.games) ?? [];
+
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-semibold">Лента</h1>
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-2xl font-semibold">Лента</h1>
+        <div className="ml-auto flex gap-1 rounded border border-zinc-800 p-1 text-sm">
+          {CATEGORIES.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setCategory(item.id)}
+              className={
+                item.id === category
+                  ? 'rounded bg-emerald-500 px-3 py-1 font-medium text-zinc-950'
+                  : 'rounded px-3 py-1 text-zinc-400 hover:text-zinc-100'
+              }
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {feed.isLoading && <p className="text-zinc-400">Загружаем ленту…</p>}
 
       {feed.isError && (
-        <p className="rounded border border-amber-700 bg-amber-950/40 p-3 text-sm text-amber-200">
-          {errorMessage(feed.error)}
+        <div className="space-y-3">
+          <p className="rounded border border-amber-700 bg-amber-950/40 p-3 text-sm text-amber-200">
+            {errorMessage(feed.error)}
+          </p>
+          <button
+            type="button"
+            onClick={() => void feed.refetch()}
+            className="rounded border border-zinc-700 px-4 py-2 text-sm text-zinc-300"
+          >
+            Повторить
+          </button>
+        </div>
+      )}
+
+      {!feed.isLoading && !feed.isError && games.length === 0 && (
+        <p className="rounded border border-zinc-800 p-4 text-sm text-zinc-400">
+          В этой категории пока пусто. Создайте игру в AI Studio — она
+          появится здесь.
         </p>
       )}
 
-      {feed.data?.items?.length ? (
-        <ul className="grid gap-3 sm:grid-cols-2">
-          {feed.data.items.map((item) => (
-            <li key={item.gameId}>
-              <Link
-                href={`/feed/${item.gameId}`}
-                className="block rounded border border-zinc-800 p-4 hover:border-emerald-600"
-              >
-                {item.title || item.gameId}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      <ul className="space-y-4">
+        {games.map((game) => (
+          <li key={game.gameId}>
+            <Link
+              href={`/feed/${game.gameId}`}
+              className="block rounded border border-zinc-800 p-4 transition-colors hover:border-emerald-600"
+            >
+              <h2 className="font-medium">{game.title || game.gameId}</h2>
+              {game.description && (
+                <p className="mt-1 text-sm text-zinc-400">{game.description}</p>
+              )}
+              <p className="mt-2 text-xs text-zinc-500">
+                {(game.genreTitles ?? []).join(' · ') || 'без жанров'}
+              </p>
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <div ref={sentinelRef} className="h-8" />
+
+      {isFetchingNextPage && (
+        <p className="text-sm text-zinc-500">Подгружаем ещё…</p>
+      )}
 
       <form
-        className="flex flex-wrap items-end gap-3"
+        className="flex flex-wrap items-end gap-3 border-t border-zinc-800 pt-6"
         onSubmit={(event) => {
           event.preventDefault();
           if (gameId.trim()) {

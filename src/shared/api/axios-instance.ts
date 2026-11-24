@@ -96,6 +96,31 @@ export async function getGame(gameId: string): Promise<GameDto> {
   return data;
 }
 
+export type FeedCategory = 'for_you' | 'new' | 'ai_picks';
+
+export interface FeedPage {
+  games: GameDto[];
+  nextCursor: string;
+}
+
+export async function getFeed(params: {
+  category: FeedCategory;
+  cursor?: string;
+  limit?: number;
+}): Promise<FeedPage> {
+  const { data } = await api.get<FeedPage>('/feed', {
+    params: {
+      category: params.category,
+      cursor: params.cursor || undefined,
+      limit: params.limit ?? 10,
+    },
+  });
+  return {
+    games: Array.isArray(data.games) ? data.games : [],
+    nextCursor: data.nextCursor ?? '',
+  };
+}
+
 export async function createTask(payload: {
   gameId: string;
   prompt: string;
