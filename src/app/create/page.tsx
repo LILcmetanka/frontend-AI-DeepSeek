@@ -1,14 +1,19 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useState } from "react";
 import {
   createTask,
   errorMessage,
+  getGame,
   getTask,
+  sendEvent,
   taskErrorMessage,
   taskStateLabel,
+  type GameDto,
 } from "@/shared/api/axios-instance";
+import { GamePlayer, type PlayerEvent } from "@/shared/lib/game-player";
 import { RequireAuth } from "@/shared/lib/require-auth";
 
 /**
@@ -16,6 +21,10 @@ import { RequireAuth } from "@/shared/lib/require-auth";
  * Статус опрашивается, пока задача не завершится: шлюз отдаёт его
  * по GET /generate/{taskId} (orchestrator.CheckGameState).
  */
+// Адрес сборки игры — build-arg, как на странице ленты.
+const GAME_URL = (process.env.NEXT_PUBLIC_GAME_URL ?? '').trim();
+const SPRITE_BASE_URL = (process.env.NEXT_PUBLIC_SPRITE_BASE_URL ?? '').trim();
+
 export default function CreatePage() {
   return (
     <RequireAuth>
@@ -40,6 +49,7 @@ function promptProblem(value: string): string | null {
 }
 
 function CreateContent() {
+  const queryClient = useQueryClient();
   const [gameId, setGameId] = useState("");
   const [prompt, setPrompt] = useState("");
   const [promptError, setPromptError] = useState<string | null>(null);
@@ -52,7 +62,12 @@ function CreateContent() {
         prompt: prompt.trim(),
         idempotencyKey: `ui-${Date.now()}`,
       }),
-    onSuccess: (data) => setTaskId(data.taskId),
+    onSuccess: (data) => {
+      setTaskId(data.taskId);
+      // Лента и «мои игры» устарели: появилась новая игра.
+      void queryClient.invalidateQueries({ queryKey: ['feed'] });
+      void queryClient.invalidateQueries({ queryKey: ['my-games'] });
+    },
   });
 
   const task = useQuery({
@@ -145,12 +160,12 @@ function CreateContent() {
           {task.data?.gameId && (
             <p>
               Игра:{" "}
-              <a
+              <Link
                 className="text-emerald-400"
                 href={`/feed/${task.data.gameId}`}
               >
                 {task.data.gameId}
-              </a>
+              </Link>
             </p>
           )}
           {task.data?.result && (
@@ -159,6 +174,70 @@ function CreateContent() {
             </pre>
           )}
         </div>
+      )}
+
+      {/* CL_0004: после завершения загружаем изменённую мини-игру — прямо
+          здесь, без перехода: сразу видно, что получилось. */}
+      {task.data?.state === 'SUCCESS' && task.data.gameId && (
+        <ResultGame gameId={task.data.gameId} />
+      )}
+    </section>
+  );
+}
+
+/** Изменённая игра после SUCCESS: карточка + плеер. */
+function ResultGame({ gameId }: { gameId: string }) {
+  const game = useQuery({
+    queryKey: ['game', gameId],
+    queryFn: () => getGame(gameId),
+    retry: false,
+    staleTime: 30_000,
+  });
+
+  const data: GameDto | undefined = game.data;
+
+  if (game.isLoading) {
+    return <p className="text-sm text-zinc-400">Загружаем изменённую игру…</p>;
+  }
+  if (game.isError || !data) {
+    return (
+      <p className="rounded border border-amber-700 bg-amber-950/40 p-3 text-sm text-amber-200">
+        Игра сохранена, но открыть её сейчас не удалось: {errorMessage(game.error)}
+      </p>
+    );
+  }
+
+  const handleEvent = (event: PlayerEvent) => {
+    void sendEvent({
+      userId: data.authorId,
+      gameId: data.gameId,
+      type: event.type,
+      durationSec: event.durationSec,
+    }).catch((error: unknown) => {
+      console.warn('Не удалось отправить событие игры:', error);
+    });
+  };
+
+  return (
+    <section className="space-y-3">
+      <h2 className="text-lg font-semibold">Новая игра</h2>
+      <p className="text-sm text-zinc-400">{data.title}</p>
+      {GAME_URL ? (
+        <GamePlayer
+          gameId={data.gameId}
+          userId={data.authorId}
+          config={data.config}
+          gameUrl={GAME_URL}
+          spriteBaseUrl={SPRITE_BASE_URL}
+          onEvent={handleEvent}
+          onReady={(readyMs) => {
+            console.info(`[NF_0001] игра готова за ${readyMs} мс`);
+          }}
+        />
+      ) : (
+        <Link className="text-emerald-400" href={`/feed/${data.gameId}`}>
+          Открыть игру в ленте
+        </Link>
       )}
     </section>
   );
