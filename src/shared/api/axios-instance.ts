@@ -181,6 +181,23 @@ export async function sendEvent(payload: {
   type: "view" | "play_start" | "play_finish" | "skip" | "like";
   durationSec?: number;
 }): Promise<void> {
+  // На закрытии вкладки обычный запрос браузер обрывает, и `skip` — событие,
+  // которое шлётся ровно в этот момент, — до метрик не доходил.
+  // sendBeacon переживает выгрузку страницы; авторизация ему не нужна:
+  // /events публичный, а userId уже в теле (ADR-0014).
+  if (
+    typeof navigator !== "undefined" &&
+    typeof navigator.sendBeacon === "function" &&
+    typeof document !== "undefined" &&
+    document.visibilityState === "hidden"
+  ) {
+    const url = new URL("/events", api.defaults.baseURL ?? window.location.origin);
+    const body = new Blob([JSON.stringify(payload)], { type: "application/json" });
+    if (navigator.sendBeacon(url, body)) {
+      return;
+    }
+  }
+
   await api.post("/events", payload);
 }
 
