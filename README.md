@@ -11,9 +11,9 @@ TanStack Query, Axios, Zod, React Hook Form, Zustand (пока не понадо
 | `/` | входная страница |
 | `/feed` | лента; пока шлюз отвечает 501 (нет RPC GetFeed), есть переход по id игры |
 | `/feed/[gameId]` | карточка игры, плеер SubwaySurf в iframe (`GET /feed/{gameId}`) |
-| `/create` | AI Studio: сообщение → задача → статус (`POST /generate`, `GET /generate/{taskId}`) |
+| `/create` | AI Studio (нужен вход): сообщение → задача → статус (`POST /generate`, `GET /generate/{taskId}`) |
 | `/login` | вход по OTP (`/auth/otp/send`, `/auth/otp/verify`) |
-| `/profile` | профиль (`GET /profile/me`) |
+| `/profile` | профиль (нужен вход, `GET /profile/me`) |
 
 ## Переменные
 
@@ -25,6 +25,18 @@ TanStack Query, Axios, Zod, React Hook Form, Zustand (пока не понадо
 
 `NEXT_PUBLIC_*` вшивается в бандл при сборке: в Docker это build-arg,
 поэтому адрес шлюза должен быть виден из браузера, а не из контейнера.
+
+## Вход и сессия
+
+- `src/shared/lib/auth.ts`: access-токен в `localStorage`, refresh — HttpOnly-кука
+  шлюза (`withCredentials`). Параллельные 401 ждут один `/auth/refresh`.
+- `axios-instance.ts`: на 401 один повтор запроса после refresh; ошибки `/auth/*`
+  не обновляются (неверный код — это не истёкшая сессия).
+- `RequireAuth` защищает `/profile` и `/create`: живой токен или refresh по куке,
+  иначе редирект на `/login?next=…`; после входа возвращает на `next`.
+- В шапке `AuthNav`: «Войти» или «Выйти» (выход гасит куку на шлюзе).
+- Шлюз ждёт `{identifier, type}` и телефон в E.164 без плюса; клиент убирает
+  из номера всё кроме цифр и меняет ведущую 8 на 7.
 
 ## Плеер
 

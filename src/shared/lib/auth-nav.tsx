@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getAccessToken, logout } from './auth';
+import { getAccessToken, logout, onAuthChanged } from './auth';
 
 /**
  * Ссылка «Войти» или кнопка «Выйти» в шапке.
@@ -20,6 +20,10 @@ export function AuthNav() {
 
   useEffect(() => {
     setSignedIn(getAccessToken() !== null);
+    // Токен восстановили после refresh на защищённой странице — шапка
+    // должна показать «Выйти», хотя getAccessToken() при первом рендере
+    // ещё видел пусто.
+    return onAuthChanged(() => setSignedIn(getAccessToken() !== null));
   }, [pathname]);
 
   if (!signedIn) {

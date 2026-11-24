@@ -21,6 +21,24 @@ const TOKEN_KEY = 'accessToken';
 const REFRESH_TIMEOUT_MS = 10_000;
 /** Запас: токен, которому осталось меньше, считаем истёкшим. */
 const EXPIRY_SKEW_SEC = 30;
+/** Событие «токен появился/исчез»: шапка обновляется без перезагрузки. */
+export const AUTH_CHANGED_EVENT = 'hookster:auth-changed';
+
+function notifyAuthChanged(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
+}
+
+/** Подписка на смену входа: своё событие + storage из других вкладок. */
+export function onAuthChanged(handler: () => void): () => void {
+  if (typeof window === 'undefined') return () => {};
+  window.addEventListener(AUTH_CHANGED_EVENT, handler);
+  window.addEventListener('storage', handler);
+  return () => {
+    window.removeEventListener(AUTH_CHANGED_EVENT, handler);
+    window.removeEventListener('storage', handler);
+  };
+}
 
 export function getAccessToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -38,6 +56,7 @@ export function setAccessToken(token: string): void {
   } catch {
     // Приватный режим/запрет storage: сессия проживёт до перезагрузки.
   }
+  notifyAuthChanged();
 }
 
 export function clearAccessToken(): void {
@@ -47,6 +66,7 @@ export function clearAccessToken(): void {
   } catch {
     // storage недоступен — чистить нечего.
   }
+  notifyAuthChanged();
 }
 
 interface JwtPayload {
