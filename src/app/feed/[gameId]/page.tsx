@@ -89,6 +89,10 @@ export default function GamePage({
           userId={data.authorId}
           config={data.config}
           gameUrl={GAME_URL}
+          // FU_0006: если в карточке пакет (index.js), плеер запускает его
+          // в песочнице; встроенная сборка — запасной вариант.
+          codeUrl={data.codeUrl}
+          codeIntegrity={data.codeIntegrity}
           spriteBaseUrl={SPRITE_BASE_URL}
           engineMinVersion={data.engineMinVersion}
           onEvent={handlePlayerEvent}

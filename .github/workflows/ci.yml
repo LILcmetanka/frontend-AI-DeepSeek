@@ -33,5 +33,10 @@ jobs:
       - name: Типы
         run: npm run typecheck
 
+      # Чистая логика режима пакета (FU_0006): SRI, разбор integrity, сборка
+      # документа песочницы. Без тест-раннера — обычный assert из node.
+      - name: Проверки пакета игры
+        run: npm run check:package
+
       - name: Сборка
         run: npm run build
