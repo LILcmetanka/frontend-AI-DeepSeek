@@ -11,6 +11,7 @@ import {
   HooksterMark,
 } from '@/components/ui/icons';
 import { GameCard } from '@/features/game/game-card';
+import { Onboarding, wasOnboardingShown } from '@/features/onboarding/onboarding';
 import {
   errorMessage,
   getFeed,
@@ -43,6 +44,13 @@ export function FeedScreen() {
   const [tab, setTab] = useState<Tab>('rec');
   const [activeIndex, setActiveIndex] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
+  // Онбординг — только в браузере: localStorage на сервере нет, поэтому
+  // решаем после монтирования (иначе разметка сервера и клиента разойдётся).
+  const [onboarding, setOnboarding] = useState(false);
+
+  useEffect(() => {
+    setOnboarding(!wasOnboardingShown());
+  }, []);
 
   const railRef = useRef<HTMLDivElement | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -311,6 +319,8 @@ export function FeedScreen() {
             </Link>
           </FrameMessage>
         )}
+
+        {onboarding && <Onboarding onDone={() => setOnboarding(false)} />}
 
         {toast && (
           <div className="animate-toast absolute top-[68px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-pill bg-peel-25 px-4 py-2.5 text-[13px] font-bold whitespace-nowrap text-peel-900 shadow-pop">
