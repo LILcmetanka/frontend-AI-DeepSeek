@@ -7,6 +7,7 @@ import { PlayIcon, RotateIcon } from '@/components/ui/icons';
 import { StageBackdrop } from '@/features/game/stage-backdrop';
 import { formatDuration } from '@/features/create/remix-status';
 import { getGameCached } from '@/shared/lib/game-cache';
+import { authorHandle } from '@/shared/lib/author';
 
 /**
  * Remix Ready — макет 07: слева карточка новой игры 9:16, справа итог,
@@ -43,7 +44,7 @@ export function RemixReady({
   const title = data?.title || 'новая игра';
   const genre = data?.genreTitles?.[0];
   const meta = [
-    data ? `@${data.authorId.slice(0, 8)}` : null,
+    data ? authorHandle(data.authorId) : null,
     genre ?? null,
     'ремикс',
   ]

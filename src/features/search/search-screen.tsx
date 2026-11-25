@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { WandIcon } from '@/components/ui/icons';
 import { StageBackdrop } from '@/features/game/stage-backdrop';
 import { getFeed, type GameDto } from '@/shared/api/axios-instance';
+import { authorHandle } from '@/shared/lib/author';
 
 /**
  * Поиск и каталог — макет «04 Search / Catalog».
@@ -269,7 +270,7 @@ function SearchCard({ game }: { game: GameDto }) {
           {title}
         </div>
         <div className="scrim-text truncate font-mono text-[11px] font-bold text-peel-100">
-          @{game.authorId.slice(0, 8)}
+          {authorHandle(game.authorId)}
         </div>
       </div>
     </Link>

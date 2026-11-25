@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { CheckIcon, CloseIcon, HooksterFace, WifiOffIcon } from '@/components/ui/icons';
 import { StageBackdrop } from '@/features/game/stage-backdrop';
 import { getFeed, isUnauthorized, type GameDto } from '@/shared/api/axios-instance';
+import { authorHandle } from '@/shared/lib/author';
 
 /**
  * Выбор исходной игры для ремикса: лист поверх экрана с сеткой из GET /feed.
@@ -172,7 +173,7 @@ export function GamePicker({
                         {game.title || 'без названия'}
                       </span>
                       <span className="truncate font-mono text-[10px] text-peel-300">
-                        @{game.authorId.slice(0, 8)}
+                        {authorHandle(game.authorId)}
                         {game.genreTitles?.[0] ? ` · ${game.genreTitles[0]}` : ''}
                       </span>
                     </span>
