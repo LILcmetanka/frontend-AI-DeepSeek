@@ -145,7 +145,7 @@ export function ProfileScreen() {
         <Link
           href="/feed"
           aria-label="назад в ленту"
-          className="grid h-11 w-11 flex-none place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-hover-strong active:scale-[0.94]"
+          className="grid h-11 w-11 flex-none place-items-center rounded-md bg-hover text-ink transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-hover-strong focus-visible:shadow-glow-strong focus-visible:outline-none active:scale-[0.94]"
         >
           <ArrowLeftIcon className="h-[22px] w-[22px]" />
         </Link>
@@ -168,7 +168,7 @@ export function ProfileScreen() {
           onClick={() => setEditing(true)}
           aria-label="редактировать профиль"
           title="редактировать профиль"
-          className="grid h-11 w-11 flex-none place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-hover-strong active:scale-[0.94]"
+          className="grid h-11 w-11 flex-none place-items-center rounded-md bg-hover text-ink transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-hover-strong focus-visible:shadow-glow-strong focus-visible:outline-none active:scale-[0.94]"
         >
           <SettingsIcon className="h-[22px] w-[22px]" />
         </button>

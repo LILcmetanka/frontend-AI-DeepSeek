@@ -54,7 +54,7 @@ export function GameOverlays({
           onClick={onLike}
           aria-label={liked ? 'убрать лайк' : 'лайк'}
           aria-pressed={liked}
-          className={`grid h-12 w-12 place-items-center rounded-pill bg-overlay backdrop-blur-[12px] transition-[background,transform] duration-[var(--dur-fast)] hover:bg-overlay active:scale-[0.94] ${
+          className={`grid h-12 w-12 place-items-center rounded-md bg-overlay backdrop-blur-[12px] transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-overlay-strong active:scale-[0.94] focus-visible:shadow-glow-strong focus-visible:outline-none ${
             liked ? 'text-danger' : 'text-peel-25'
           }`}
         >
@@ -70,7 +70,7 @@ export function GameOverlays({
         aria-label="комментарии"
         title="комментарии появятся позже"
         onClick={() => onNotify('комментарии появятся позже')}
-        className="grid h-12 w-12 place-items-center rounded-pill bg-overlay text-peel-25 backdrop-blur-[12px] transition-[background,transform] duration-[var(--dur-fast)] hover:bg-overlay active:scale-[0.94]"
+        className="grid h-12 w-12 place-items-center rounded-md bg-overlay text-peel-25 backdrop-blur-[12px] transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-overlay-strong active:scale-[0.94] focus-visible:shadow-glow-strong focus-visible:outline-none"
       >
         <CommentIcon className="h-6 w-6" />
       </button>
@@ -79,7 +79,7 @@ export function GameOverlays({
         type="button"
         onClick={() => void share()}
         aria-label="поделиться"
-        className="grid h-12 w-12 place-items-center rounded-pill bg-overlay text-peel-25 backdrop-blur-[12px] transition-[background,transform] duration-[var(--dur-fast)] hover:bg-overlay active:scale-[0.94]"
+        className="grid h-12 w-12 place-items-center rounded-md bg-overlay text-peel-25 backdrop-blur-[12px] transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-overlay-strong active:scale-[0.94] focus-visible:shadow-glow-strong focus-visible:outline-none"
       >
         <ShareIcon className="h-[21px] w-[21px]" />
       </button>
@@ -89,7 +89,7 @@ export function GameOverlays({
         <Link
           href={`/create?gameId=${gameId}`}
           aria-label="сделать ремикс"
-          className="animate-glow grid h-[60px] w-[60px] place-items-center rounded-pill bg-acid text-on-acid transition-[background,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94]"
+          className="animate-glow grid h-[54px] w-[54px] place-items-center rounded-md bg-acid text-on-acid transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94] focus-visible:shadow-glow-strong focus-visible:outline-none"
         >
           <WandIcon className="h-[27px] w-[27px]" />
         </Link>

@@ -155,7 +155,7 @@ export function ProfileEditSheet({
             type="button"
             onClick={onClose}
             aria-label="закрыть"
-            className="grid h-10 w-10 flex-none place-items-center rounded-pill bg-hover text-ink transition-colors duration-[var(--dur-fast)] hover:bg-hover-strong"
+            className="grid h-10 w-10 flex-none place-items-center rounded-md bg-hover text-ink transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-hover-strong focus-visible:shadow-glow-strong focus-visible:outline-none active:scale-[0.94]"
           >
             <CloseIcon className="h-5 w-5" />
           </button>

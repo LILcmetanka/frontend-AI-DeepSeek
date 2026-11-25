@@ -45,7 +45,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
       title={label}
       aria-pressed={theme === 'light'}
       data-theme-toggle
-      className={`grid h-10 w-10 flex-none place-items-center rounded-pill bg-hover text-ink-soft transition-[background,color,transform] duration-[var(--dur-fast)] hover:bg-hover-strong hover:text-ink active:scale-[0.94] ${className}`}
+      className={`grid h-10 w-10 flex-none place-items-center rounded-md bg-hover text-ink-soft transition-[background,color,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-hover-strong hover:text-ink focus-visible:shadow-glow-strong focus-visible:outline-none active:scale-[0.94] ${className}`}
     >
       {theme === 'dark' ? (
         <SunIcon className="h-5 w-5" />

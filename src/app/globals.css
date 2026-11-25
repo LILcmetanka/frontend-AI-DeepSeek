@@ -88,6 +88,8 @@
   --color-card-hover: var(--surface-card-hover);
   --color-input: var(--surface-input);
   --color-overlay: var(--bg-overlay);
+  /* чуть плотнее — состояние hover оверлеев поверх игры */
+  --color-overlay-strong: var(--bg-overlay-strong);
   /* инверсная плашка: тост на тёмном — светлый, на светлом — чернильный */
   --color-inverse: var(--surface-inverse);
   --color-on-inverse: var(--text-inverse);
@@ -307,6 +309,7 @@
   --bg-sunken: var(--color-peel-950);
   --bg-raised: var(--color-peel-800);
   --bg-overlay: rgba(6, 6, 3, 0.72);
+  --bg-overlay-strong: rgba(6, 6, 3, 0.88);
 
   --surface-card: var(--color-peel-800);
   --surface-card-hover: var(--color-peel-700);
@@ -382,6 +385,7 @@
   --bg-sunken: var(--color-peel-50);
   --bg-raised: var(--color-peel-0);
   --bg-overlay: rgba(13, 13, 7, 0.55);
+  --bg-overlay-strong: rgba(13, 13, 7, 0.72);
 
   --surface-card: var(--color-peel-0);
   --surface-card-hover: var(--color-peel-50);
@@ -430,6 +434,7 @@
   --bg-sunken: var(--color-peel-950);
   --bg-raised: var(--color-peel-800);
   --bg-overlay: rgba(6, 6, 3, 0.72);
+  --bg-overlay-strong: rgba(6, 6, 3, 0.88);
   --surface-card: var(--color-peel-800);
   --surface-card-hover: var(--color-peel-700);
   --surface-input: var(--color-peel-700);

@@ -68,7 +68,7 @@ export function OfflinePlayer({
           type="button"
           onClick={onClose}
           aria-label="закрыть офлайн-игру"
-          className="grid h-10 w-10 flex-none place-items-center rounded-pill bg-overlay text-peel-25 backdrop-blur-[12px] transition-[background,transform] duration-[var(--dur-fast)] hover:bg-overlay active:scale-[0.94]"
+          className="grid h-10 w-10 flex-none place-items-center rounded-md bg-overlay text-peel-25 backdrop-blur-[12px] transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-overlay-strong focus-visible:shadow-glow-strong focus-visible:outline-none active:scale-[0.94]"
         >
           <CloseIcon className="h-[18px] w-[18px]" />
         </button>
