@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import './globals.css';
-import { AuthNav } from '@/shared/lib/auth-nav';
+import { AppShell } from '@/components/layout/app-shell';
 import { QueryProvider } from '@/shared/lib/query-provider';
 
 export const metadata: Metadata = {
@@ -9,40 +8,16 @@ export const metadata: Metadata = {
   description: 'Лента мини-игр, которые можно менять текстом',
 };
 
-const nav = [
-  { href: '/', label: 'Главная' },
-  { href: '/feed', label: 'Лента' },
-  { href: '/create', label: 'AI Studio' },
-  { href: '/profile', label: 'Профиль' },
-];
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ru">
-      <body className="min-h-screen bg-zinc-950 text-zinc-100">
+      <body className="h-full bg-stage text-ink antialiased">
         <QueryProvider>
-          <header className="border-b border-zinc-800">
-            {/* NF_013: mobile-first — на узком экране шапка переносится,
-                а не выдавливает «Выйти» за экран. */}
-            <nav className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-3 py-3 text-sm sm:gap-x-6 sm:px-4 sm:py-4">
-              <span className="font-semibold text-emerald-400">Hookster</span>
-              {nav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-zinc-400 transition-colors hover:text-zinc-100"
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <AuthNav />
-            </nav>
-          </header>
-          <main className="mx-auto max-w-5xl px-3 py-5 sm:px-4 sm:py-8">
-            {children}
-          </main>
+          {/* NF_013: каркас один на все маршруты. На телефоне сайдбар
+              уезжает, вместо него — нижняя навигация. */}
+          <AppShell>{children}</AppShell>
         </QueryProvider>
       </body>
     </html>

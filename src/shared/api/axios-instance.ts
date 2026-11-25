@@ -168,6 +168,19 @@ export async function getLikedGameIds(limit = 50): Promise<string[]> {
   return Array.isArray(data) ? data : [];
 }
 
+/**
+ * FU_0028: поставить лайк. Шлюз отвечает 204 и счётчика не отдаёт —
+ * поэтому в интерфейсе только состояние сердца, без числа.
+ */
+export async function addLike(gameId: string): Promise<void> {
+  await api.post(`/likes/${gameId}`);
+}
+
+/** FU_0028: убрать лайк. Тоже 204 без тела. */
+export async function removeLike(gameId: string): Promise<void> {
+  await api.delete(`/likes/${gameId}`);
+}
+
 /** Карточки по id: битые/удалённые игры пропускаем, лента не должна падать. */
 export async function getGamesByIds(ids: string[]): Promise<GameDto[]> {
   const results = await Promise.allSettled(ids.map((id) => getGame(id)));

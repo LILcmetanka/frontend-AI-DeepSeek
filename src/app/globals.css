@@ -1,1 +1,210 @@
-@import 'tailwindcss';
+@import url("https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800;900&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
+@import "tailwindcss";
+
+/*
+ * Токены дизайн-макета Hookster (design/gaming-feed-design/tokens).
+ * Значения один в один из макета: не подбирать «на глаз» и не вводить
+ * свою палитру — тёмная тема продукта, жёлтый banana и кислый lime.
+ */
+@theme {
+  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --font-text: "Manrope", "Helvetica Neue", Helvetica, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /* peel — тёплые нейтрали */
+  --color-peel-0: #ffffff;
+  --color-peel-25: #fbfbf4;
+  --color-peel-50: #f2f2e8;
+  --color-peel-100: #e6e6d8;
+  --color-peel-200: #cfcfbe;
+  --color-peel-300: #a8a897;
+  --color-peel-400: #7a7a6b;
+  --color-peel-500: #55554a;
+  --color-peel-600: #3a3a32;
+  --color-peel-700: #26261f;
+  --color-peel-800: #17170f;
+  --color-peel-900: #0d0d07;
+  --color-peel-950: #060603;
+
+  /* banana — ядро бренда */
+  --color-banana-100: #fff7b8;
+  --color-banana-200: #ffef7a;
+  --color-banana-300: #ffe23d;
+  --color-banana-400: #ffd100;
+  --color-banana-500: #f5bc00;
+
+  /* lime — кислота */
+  --color-lime-50: #f4ffde;
+  --color-lime-100: #e4ffb0;
+  --color-lime-200: #d2ff70;
+  --color-lime-300: #c6ff2e;
+  --color-lime-400: #a8f000;
+  --color-lime-600: #6ba300;
+
+  /* hot — единственный не-банановый акцент */
+  --color-hot-200: #ff8fc6;
+  --color-hot-300: #ff2e93;
+
+  /* семантика поверхностей и текста */
+  --color-stage: #060603;
+  --color-page: #0d0d07;
+  --color-raised: #17170f;
+  --color-ink: #fbfbf4;
+  --color-ink-dim: #e6e6d8;
+  --color-ink-soft: #a8a897;
+  --color-ink-mute: #7a7a6b;
+  --color-line: rgba(242, 242, 232, 0.12);
+  --color-line-strong: rgba(242, 242, 232, 0.28);
+  --color-hover: rgba(242, 242, 232, 0.08);
+  --color-hover-strong: rgba(242, 242, 232, 0.16);
+  --color-acid: #c6ff2e;
+  --color-acid-hi: #d2ff70;
+  --color-acid-lo: #a8f000;
+  --color-banana: #ffe23d;
+  --color-hot: #ff2e93;
+
+  /* макет считает десктопом всё от 900 px, а не от 1024 (lg) */
+  --breakpoint-dt: 900px;
+
+  /* радиусы и тени из макета */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 24px 64px rgba(0, 0, 0, 0.55);
+  --shadow-stick: 4px 4px 0 var(--color-lime-600);
+
+  /* движение из tokens/motion.css */
+  --ease-snap: cubic-bezier(0.2, 0.9, 0.2, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-boing: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-glow: hk-glow 2400ms var(--ease-soft) infinite;
+  --animate-pop: hk-pop 420ms var(--ease-boing);
+  --animate-sheet: hk-sheet 340ms var(--ease-boing);
+  --animate-toast: hk-toast 240ms var(--ease-boing);
+
+  @keyframes hk-glow {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 0 rgba(198, 255, 46, 0.42),
+        0 0 22px rgba(198, 255, 46, 0.35);
+    }
+    50% {
+      box-shadow:
+        0 0 0 9px rgba(198, 255, 46, 0),
+        0 0 30px rgba(198, 255, 46, 0.55);
+    }
+  }
+
+  @keyframes hk-pop {
+    0% {
+      transform: scale(0.7);
+    }
+    55% {
+      transform: scale(1.18);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes hk-sheet {
+    from {
+      transform: translateY(18px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes hk-toast {
+    from {
+      transform: translate(-50%, -10px);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background: var(--color-stage);
+    color: var(--color-ink);
+    font-family: var(--font-text);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+  }
+
+  ::selection {
+    background: var(--color-acid);
+    color: var(--color-stage);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-acid);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  /* Лента занимает весь экран: полосу прокрутки прячем, как в макете. */
+  .feed-rail {
+    scrollbar-width: none;
+  }
+
+  .feed-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Текст поверх игры читается на любом фоне (макет: text-shadow). */
+  .scrim-text {
+    text-shadow: 0 2px 12px rgba(6, 6, 3, 0.8);
+  }
+
+  .scrim-title {
+    text-shadow: 0 2px 18px rgba(6, 6, 3, 0.85);
+  }
+}
+
+/*
+ * Рамка ленты: в макете это 9:16 на десктопе (max-height 980 px,
+ * max-width 551 px) с радиусом и общей тенью, на телефоне — весь экран.
+ */
+.feed-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-stage);
+}
+
+@media (min-width: 900px) {
+  .feed-frame {
+    width: min(calc((100dvh - 48px) * 0.5625), 551px);
+    height: min(calc(100dvh - 48px), 980px);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-pop);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feed-rail {
+    scroll-behavior: auto;
+  }
+}
