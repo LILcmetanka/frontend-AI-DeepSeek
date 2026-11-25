@@ -15,6 +15,7 @@ import {
 import { GameCard } from '@/features/game/game-card';
 import { OfflinePlayer } from '@/features/game/offline-player';
 import { ConnectionLost } from '@/components/ui/connection-lost';
+import { TraceIdNote } from '@/components/ui/trace-id-note';
 import { Onboarding, wasOnboardingShown } from '@/features/onboarding/onboarding';
 import {
   errorMessage,
@@ -376,6 +377,8 @@ export function FeedScreen() {
           !isUnauthorized(feed.error) &&
           !isNetworkError(feed.error) && (
             <FrameMessage title={errorMessage(feed.error)}>
+              {/* Э27: код запроса из ответа шлюза — по нему ищут инцидент. */}
+              <TraceIdNote error={feed.error} />
               <button
                 type="button"
                 onClick={() => void feed.refetch()}

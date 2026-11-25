@@ -12,6 +12,7 @@ import {
 import { ProfileGameTile } from '@/features/profile/profile-game-tile';
 import { ProfileEditSheet, ProfileSavedToast } from '@/features/profile/profile-form';
 import { ConnectionLost } from '@/components/ui/connection-lost';
+import { TraceIdNote } from '@/components/ui/trace-id-note';
 import {
   errorMessage,
   getAccount,
@@ -116,6 +117,7 @@ export function ProfileScreen() {
     }
     return (
       <ProfileFrame title={errorMessage(me.error)}>
+        <TraceIdNote error={me.error} />
         <button
           type="button"
           onClick={() => void me.refetch()}
