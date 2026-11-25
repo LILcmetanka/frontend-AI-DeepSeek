@@ -57,8 +57,30 @@ cp .env.example .env.local
 npm run dev      # http://localhost:3000
 npm run lint
 npm run typecheck
+npm test         # чистые модули, node --test
 npm run build
 ```
+
+## Тесты
+
+Раннера в проекте нет и новых пакетов не ставим: `npm test` — это
+`node --test "src/**/*.spec.ts"`. Node 24 исполняет TypeScript сам
+(type stripping), поэтому спек-файл импортирует модуль с явным `.ts`
+(в `tsconfig.json` из-за этого включён `allowImportingTsExtensions`).
+
+Покрыто то, что легко сломать незаметно и что не требует браузера:
+
+| Файл | Что проверяется |
+|---|---|
+| `shared/lib/trace-id.spec.ts` | разбор `X-Trace-ID` из заголовков (`AxiosHeaders` и обычный объект), форма и длина, у обрыва связи кода нет |
+| `shared/lib/author.spec.ts` | подпись автора: восемь символов, `@неизвестный` на пустом id |
+| `shared/lib/session-result.spec.ts` | `formatDuration`, чтение итога сессии из `sessionStorage` (битый JSON, пустой `gameId`, нечисловая длительность, очки только числом), `save`/`clear` |
+| `shared/lib/auth.spec.ts` | `isTokenExpired`: запас 30 секунд, мусор, payload без `exp` |
+
+`shared/lib/game-package.ts` проверяется отдельно — `npm run
+check:package` (SRI, разбор `integrity`, `buildPackageDocument`).
+Браузерные проверки (лента, плеер, мобильный набор, офлайн) живут в
+umbrella: `make edge`, `make smoke`, `scripts/browser-check/*`.
 
 ## Ограничения
 
