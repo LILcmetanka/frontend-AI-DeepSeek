@@ -8,8 +8,8 @@ TanStack Query, Axios, Zod, React Hook Form, Zustand (пока не понадо
 
 | Путь | Что показывает |
 |---|---|
-| `/` | входная страница |
-| `/feed` | лента; пока шлюз отвечает 501 (нет RPC GetFeed), есть переход по id игры |
+| `/` | витрина продукта (логотип, заголовок, два выхода) |
+| `/feed` | лента карточек со свайпом и клавишами, догрузка, конец ленты |
 | `/feed/[gameId]` | карточка игры, плеер SubwaySurf в iframe (`GET /feed/{gameId}`) |
 | `/create` | AI Studio (нужен вход): сообщение → задача → статус (`POST /generate`, `GET /generate/{taskId}`) |
 | `/login` | вход по OTP (`/auth/otp/send`, `/auth/otp/verify`) |
@@ -34,7 +34,7 @@ TanStack Query, Axios, Zod, React Hook Form, Zustand (пока не понадо
   не обновляются (неверный код — это не истёкшая сессия).
 - `RequireAuth` защищает `/profile` и `/create`: живой токен или refresh по куке,
   иначе редирект на `/login?next=…`; после входа возвращает на `next`.
-- В шапке `AuthNav`: «Войти» или «Выйти» (выход гасит куку на шлюзе).
+- В шапке и сайдбаре — вход/выход и переключатель темы.
 - Шлюз ждёт `{identifier, type}` и телефон в E.164 без плюса; клиент убирает
   из номера всё кроме цифр и меняет ведущую 8 на 7.
 
@@ -60,6 +60,27 @@ npm run typecheck
 npm test         # чистые модули, node --test
 npm run build
 ```
+
+## Дизайн-система
+
+Источник правды — `Hookster-AI/design/gaming-feed-design/uploads/Hookster дизайн-система (2)`
+(`readme.md`, `tokens/*.css`, `guidelines/`). В коде:
+
+- `src/app/globals.css` — палитра и шкалы из `tokens/*.css` в Tailwind `@theme`;
+  семантические токены — ссылки на палитру, поэтому темы меняются значениями.
+  Ссылаться на палитру надо как `var(--color-lime-300)` — `var(--lime-300)`
+  не существует и свойство молча станет невалидным.
+- `src/components/brand/brand.tsx` — `HooksterMark`, `HooksterFace`,
+  `HooksterAppIcon`, `HooksterLockup`, `Mascot`. SVG из системы — `public/brand/logo/`.
+- `src/components/ui/controls.tsx` — кнопки (8 видов × 4 размера), поле, поле
+  промпта, чипы, бейджи, сообщения; `components/ui/empty-state.tsx` — пустое
+  состояние с маскотом.
+- `src/shared/lib/theme.ts` — тема `hookster:theme` в `localStorage`, тёмная по
+  умолчанию, скрипт в `<head>` ставит атрибут до первой отрисовки.
+
+Правила: одна лаймовая primary-кнопка на экран; маскот — только пустые
+состояния и загрузка; иконки — контуры lucide `strokeWidth={2.5}`; тексты
+строчными, «на ты», без канцелярита. Решения — ADR-0044, ADR-0045.
 
 ## Тесты
 
