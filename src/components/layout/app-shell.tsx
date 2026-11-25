@@ -16,7 +16,7 @@ import { useSignedIn } from '@/shared/lib/use-signed-in';
 
 const NAV = [
   { href: '/feed', label: 'главная', Icon: HomeIcon },
-  { href: null, label: 'поиск', Icon: SearchIcon },
+  { href: '/search', label: 'поиск', Icon: SearchIcon },
   { href: '/profile', label: 'профиль', Icon: UserIcon },
 ] as const;
 
@@ -44,7 +44,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   // Профиль сам держит поля и ширину колонки 980 px из макета: sticky-шапка
   // во всю ширину не получится, если отступы добавляет каркас.
   // AI Remix сам держит карточку 1060 px из макета 06 — по той же причине.
-  const isFullWidth = isFeed || pathname === '/profile' || pathname === '/create';
+  // Поиск сам держит шапку с полем ввода и сетку в 5 колонок (макет 04),
+  // поэтому ему тоже нужна вся ширина без внешних отступов.
+  const isFullWidth =
+    isFeed ||
+    pathname === '/profile' ||
+    pathname === '/create' ||
+    pathname === '/search';
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-page text-ink">
@@ -57,33 +63,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </Link>
 
         <nav className="flex flex-col gap-1">
-          {NAV.map(({ href, label, Icon }) =>
-            href === null ? (
-              // Поиска пока нет ни в макете-роутинге, ни в API. Пункт
-              // оставляем визуально, но не делаем вид, что он работает.
-              <span
-                key={label}
-                aria-disabled="true"
-                title="поиск пока не готов"
-                className={`${navClass(false)} cursor-not-allowed opacity-45`}
-              >
-                <Icon className="h-6 w-6 flex-none" />
-                {label}
-              </span>
-            ) : (
-              <Link
-                key={label}
-                href={href}
-                aria-current={isActiveHref(pathname, href) ? 'page' : undefined}
-                className={navClass(isActiveHref(pathname, href))}
-              >
-                <Icon
-                  className={`h-6 w-6 flex-none ${isActiveHref(pathname, href) ? 'text-acid' : ''}`}
-                />
-                {label}
-              </Link>
-            ),
-          )}
+          {NAV.map(({ href, label, Icon }) => (
+            <Link
+              key={label}
+              href={href}
+              aria-current={isActiveHref(pathname, href) ? 'page' : undefined}
+              className={navClass(isActiveHref(pathname, href))}
+            >
+              <Icon
+                className={`h-6 w-6 flex-none ${isActiveHref(pathname, href) ? 'text-acid' : ''}`}
+              />
+              {label}
+            </Link>
+          ))}
         </nav>
 
         <div className="h-px bg-line" />
@@ -173,30 +165,19 @@ function AuthAction() {
 function MobileNav({ pathname }: { pathname: string }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 flex h-[66px] items-center justify-around border-t border-line bg-[rgba(6,6,3,0.72)] px-2 backdrop-blur-[14px] dt:hidden">
-      {NAV.map(({ href, label, Icon }) =>
-        href === null ? (
-          <span
-            key={label}
-            aria-disabled="true"
-            className="flex h-14 min-w-16 cursor-not-allowed flex-col items-center justify-center gap-1 font-mono text-[10px] font-bold tracking-[0.06em] text-ink-soft opacity-45"
-          >
-            <Icon className="h-6 w-6" />
-            {label}
-          </span>
-        ) : (
-          <Link
-            key={label}
-            href={href}
-            aria-current={isActiveHref(pathname, href) ? 'page' : undefined}
-            className={`flex h-14 min-w-16 flex-col items-center justify-center gap-1 font-mono text-[10px] font-bold tracking-[0.06em] transition-colors ${
-              isActiveHref(pathname, href) ? 'text-acid' : 'text-ink-soft hover:text-ink'
-            }`}
-          >
-            <Icon className="h-6 w-6" />
-            {label}
-          </Link>
-        ),
-      )}
+      {NAV.map(({ href, label, Icon }) => (
+        <Link
+          key={label}
+          href={href}
+          aria-current={isActiveHref(pathname, href) ? 'page' : undefined}
+          className={`flex h-14 min-w-16 flex-col items-center justify-center gap-1 font-mono text-[10px] font-bold tracking-[0.06em] transition-colors ${
+            isActiveHref(pathname, href) ? 'text-acid' : 'text-ink-soft hover:text-ink'
+          }`}
+        >
+          <Icon className="h-6 w-6" />
+          {label}
+        </Link>
+      ))}
     </nav>
   );
 }
