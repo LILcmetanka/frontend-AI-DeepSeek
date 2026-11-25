@@ -273,6 +273,16 @@ export function isUnauthorized(error: unknown): boolean {
   return axios.isAxiosError(error) && error.response?.status === 401;
 }
 
+/**
+ * Сетевая ошибка: ответа нет вовсе (обрыв, DNS, офлайн) — в отличие от
+ * ответа сервера с кодом. Макет 08 просит показывать такой случай как
+ * «связь пропала», а не как техническую ошибку запроса.
+ */
+export function isNetworkError(error: unknown): boolean {
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return true;
+  return axios.isAxiosError(error) && !error.response;
+}
+
 export function errorMessage(error: unknown): string {
   if (axios.isAxiosError<ErrorDto>(error)) {
     const detail = error.response?.data?.error?.message;

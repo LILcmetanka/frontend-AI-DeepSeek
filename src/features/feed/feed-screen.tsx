@@ -8,19 +8,29 @@ import {
   CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  HooksterFace,
   HooksterMark,
+  WandIcon,
 } from '@/components/ui/icons';
 import { GameCard } from '@/features/game/game-card';
+import { OfflinePlayer } from '@/features/game/offline-player';
+import { ConnectionLost } from '@/components/ui/connection-lost';
 import { Onboarding, wasOnboardingShown } from '@/features/onboarding/onboarding';
 import {
   errorMessage,
   getFeed,
   getGame,
+  isNetworkError,
   isUnauthorized,
   type GameDto,
 } from '@/shared/api/axios-instance';
 import { getAccessToken } from '@/shared/lib/auth';
+import {
+  listOfflineGames,
+  type OfflineGameEntry,
+} from '@/shared/lib/offline-games';
 import { useGameLikes } from '@/shared/lib/use-game-likes';
+import { useOnline } from '@/shared/lib/use-online';
 
 /**
  * Лента как в макете «Главная · лента»: одна игра на весь экран,
@@ -47,10 +57,21 @@ export function FeedScreen() {
   // Онбординг — только в браузере: localStorage на сервере нет, поэтому
   // решаем после монтирования (иначе разметка сервера и клиента разойдётся).
   const [onboarding, setOnboarding] = useState(false);
+  // Офлайн (макет 08): список сохранённых игр и открытая офлайн-игра.
+  const [offlineGames, setOfflineGames] = useState<OfflineGameEntry[]>([]);
+  const [offlineEntry, setOfflineEntry] = useState<OfflineGameEntry | null>(null);
+  const online = useOnline();
 
   useEffect(() => {
     setOnboarding(!wasOnboardingShown());
+    setOfflineGames(listOfflineGames());
   }, []);
+
+  // Связь вернулась или лента перезагрузилась — список офлайн-игр мог
+  // обновиться на экране игры.
+  useEffect(() => {
+    if (online) setOfflineGames(listOfflineGames());
+  }, [online]);
 
   const railRef = useRef<HTMLDivElement | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -76,6 +97,14 @@ export function FeedScreen() {
     [feed.data?.pages],
   );
 
+  // Конец ленты — отдельная карточка по макету 08: показываем только когда
+  // страниц больше нет и ничего не догружается. Тогда листание доходит до
+  // неё, и индикатор не выходит за пределы числа игр.
+  const showCards = tab === 'rec' && games.length > 0;
+  const showEnd =
+    showCards && !feed.isLoading && !hasNextPage && !isFetchingNextPage;
+  const panelCount = games.length + (showEnd ? 1 : 0);
+
   /* ---------- лайки ---------- */
   // Один хук на ленту и экран игры: список id понравившихся из GET /likes,
   // счётчика лайков в API нет — число не рисуем.
@@ -98,8 +127,8 @@ export function FeedScreen() {
   const goTo = useCallback(
     (index: number) => {
       const rail = railRef.current;
-      if (!rail || games.length === 0) return;
-      const clamped = Math.max(0, Math.min(index, games.length - 1));
+      if (!rail || panelCount === 0) return;
+      const clamped = Math.max(0, Math.min(index, panelCount - 1));
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       rail.scrollTo({
         top: clamped * rail.clientHeight,
@@ -107,7 +136,7 @@ export function FeedScreen() {
       });
       setActiveIndex(clamped);
     },
-    [games.length],
+    [panelCount],
   );
 
   const handleScroll = useCallback(() => {
@@ -168,7 +197,7 @@ export function FeedScreen() {
           break;
         case 'End':
           event.preventDefault();
-          goTo(games.length - 1);
+          goTo(panelCount - 1);
           break;
         case 'Enter': {
           // Enter на кнопке/ссылке принадлежит ей, а не ленте.
@@ -187,13 +216,17 @@ export function FeedScreen() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [activeIndex, games, router, goTo]);
+  }, [activeIndex, games, router, goTo, panelCount]);
 
   function handleLike(gameId: string): void {
     toggleLike(gameId);
   }
 
-  const showCards = tab === 'rec' && games.length > 0;
+  /** «смотреть заново» на карточке конца ленты: возврат к первой игре. */
+  const startOver = useCallback(() => {
+    railRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+    setActiveIndex(0);
+  }, []);
 
   return (
     <div className="relative flex h-full w-full items-center justify-center bg-stage dt:p-6">
@@ -223,6 +256,37 @@ export function FeedScreen() {
                 />
               </div>
             ))}
+          {showEnd && (
+            <div
+              data-feed-end
+              className="flex h-full w-full snap-start snap-always flex-col items-center justify-center gap-[18px] bg-peel-950 px-8 text-center"
+            >
+              <span className="grid h-[76px] w-[76px] flex-none place-items-center overflow-hidden rounded-pill bg-acid">
+                <HooksterFace className="w-[57px] text-peel-900" />
+              </span>
+              <p className="font-display text-[24px] leading-[1.1] font-extrabold tracking-[-0.03em] text-peel-25">
+                на сегодня всё
+              </p>
+              <p className="max-w-[300px] text-[14px] leading-[1.5] font-medium text-peel-300">
+                свежие игры подвезут к вечеру. можно пересобрать что-нибудь
+                своё прямо сейчас
+              </p>
+              <Link
+                href="/create"
+                className="inline-flex h-[50px] items-center justify-center gap-2 rounded-pill bg-acid px-6 text-[15px] font-extrabold text-peel-900 transition-[background,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi hover:shadow-[0_0_24px_rgba(198,255,46,0.45)] active:scale-[0.94]"
+              >
+                <WandIcon className="h-[19px] w-[19px]" />
+                сделать свою игру
+              </Link>
+              <button
+                type="button"
+                onClick={startOver}
+                className="rounded-pill px-4 py-2 font-mono text-[12px] text-peel-300 transition-colors duration-150 hover:text-peel-25"
+              >
+                смотреть заново
+              </button>
+            </div>
+          )}
         </div>
 
         <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-[58px] items-center gap-3 px-3.5">
@@ -263,7 +327,7 @@ export function FeedScreen() {
         {/* Индикатор позиции для скринридеров и проверок CL_0001. */}
         {showCards && (
           <span className="sr-only" data-feed-position>
-            {activeIndex + 1} / {games.length}
+            {Math.min(activeIndex + 1, games.length)} / {games.length}
           </span>
         )}
 
@@ -296,17 +360,31 @@ export function FeedScreen() {
           </FrameMessage>
         )}
 
-        {tab === 'rec' && feed.isError && !isUnauthorized(feed.error) && (
-          <FrameMessage title={errorMessage(feed.error)}>
-            <button
-              type="button"
-              onClick={() => void feed.refetch()}
-              className="mt-4 rounded-pill border-2 border-line-strong px-5 py-2.5 text-[14px] font-bold text-ink transition-colors hover:border-acid hover:text-acid"
-            >
-              повторить
-            </button>
-          </FrameMessage>
+        {/* Макет 08: ответа нет вовсе — «связь пропала», а не код ошибки. */}
+        {tab === 'rec' && feed.isError && isNetworkError(feed.error) && (
+          <div className="absolute inset-0 z-10 bg-peel-950/70">
+            <ConnectionLost
+              offlineGames={offlineGames}
+              onRetry={() => void feed.refetch()}
+              onPlayOffline={setOfflineEntry}
+            />
+          </div>
         )}
+
+        {tab === 'rec' &&
+          feed.isError &&
+          !isUnauthorized(feed.error) &&
+          !isNetworkError(feed.error) && (
+            <FrameMessage title={errorMessage(feed.error)}>
+              <button
+                type="button"
+                onClick={() => void feed.refetch()}
+                className="mt-4 rounded-pill border-2 border-line-strong px-5 py-2.5 text-[14px] font-bold text-ink transition-colors hover:border-acid hover:text-acid"
+              >
+                повторить
+              </button>
+            </FrameMessage>
+          )}
 
         {tab === 'rec' && !feed.isLoading && !feed.isError && games.length === 0 && (
           <FrameMessage title="В ленте пока пусто">
@@ -321,6 +399,22 @@ export function FeedScreen() {
         )}
 
         {onboarding && <Onboarding onDone={() => setOnboarding(false)} />}
+
+        {offlineEntry && (
+          <OfflinePlayer
+            entry={offlineEntry}
+            onClose={() => setOfflineEntry(null)}
+          />
+        )}
+
+        {!online && showCards && (
+          <div
+            data-offline-banner
+            className="absolute top-[68px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-pill bg-peel-25 px-4 py-2 text-[12px] font-bold whitespace-nowrap text-peel-900 shadow-pop"
+          >
+            нет сети — показываем сохранённое
+          </div>
+        )}
 
         {toast && (
           <div className="animate-toast absolute top-[68px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-pill bg-peel-25 px-4 py-2.5 text-[13px] font-bold whitespace-nowrap text-peel-900 shadow-pop">
@@ -343,7 +437,7 @@ export function FeedScreen() {
         <button
           type="button"
           onClick={() => goTo(activeIndex + 1)}
-          disabled={activeIndex >= games.length - 1}
+          disabled={activeIndex >= panelCount - 1}
           aria-label="следующая игра"
           className="grid h-[46px] w-[46px] place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-hover-strong active:scale-[0.94] disabled:pointer-events-none disabled:opacity-40"
         >

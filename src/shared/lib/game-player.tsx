@@ -164,6 +164,13 @@ export interface GamePlayerProps {
   codeUrl?: string;
   /** Контрольная сумма пакета (GameDto.codeIntegrity), формат SRI. */
   codeIntegrity?: string;
+  /**
+   * Код пакета, сохранённый на устройстве (макет 08, офлайн-игры). Если сеть
+   * недоступна или пакет не скачался, играем этот код — после проверки SRI.
+   */
+  initialCode?: string;
+  /** Пакет успешно скачан и проверен: карточку и код можно сохранить офлайн. */
+  onPackageCode?: (code: string) => void;
   /** База S3/CDN для относительных путей спрайтов. */
   spriteBaseUrl?: string;
   /** Минимальная версия движка из карточки игры (NF_0010). */
@@ -195,6 +202,8 @@ export function GamePlayer({
   gameUrl,
   codeUrl,
   codeIntegrity,
+  initialCode,
+  onPackageCode,
   spriteBaseUrl,
   engineMinVersion,
   engineVersion = DEFAULT_ENGINE_VERSION,
@@ -248,6 +257,15 @@ export function GamePlayer({
   );
   const targetOrigin = useMemo(() => messageTargetOrigin(gameUrl), [gameUrl]);
 
+  // Офлайн-код и колбэк сохранения держим в ref: их смена не должна
+  // перезапускать загрузку пакета, если всё уже загружено.
+  const initialCodeRef = useRef(initialCode);
+  const onPackageCodeRef = useRef(onPackageCode);
+  useEffect(() => {
+    initialCodeRef.current = initialCode;
+    onPackageCodeRef.current = onPackageCode;
+  }, [initialCode, onPackageCode]);
+
   // FU_0006: пакет игры. `packageDoc` непустой — играем пакет в песочнице,
   // иначе встроенную сборку. `packageNote` — причина отката, для атрибута.
   const packageCandidate = useMemo(() => isPackageGame(codeUrl), [codeUrl]);
@@ -266,8 +284,40 @@ export function GamePlayer({
     if (!packageCandidate || !compatible || !codeUrl) return;
     let cancelled = false;
 
+    /** Собрать документ песочницы из кода и включить режим пакета. */
+    const startFromCode = (code: string) => {
+      const doc = buildPackageDocument({
+        code,
+        config: parsedConfig,
+        gameId,
+        userId,
+        spriteBaseUrl: spriteBaseUrl ?? '',
+      });
+      if (cancelled) return;
+      setPackageDoc(doc);
+      setPackageStatus('ready');
+      setPackageNote('');
+    };
+
+    /** Сохранённый код годится, только если целостность не опровергнута. */
+    const savedCodeWorks = async (code: string) =>
+      (await verifyIntegrity(code, codeIntegrity)) !== 'mismatch';
+
     const load = async () => {
       setPackageStatus('loading');
+      const saved = initialCodeRef.current;
+
+      // Офлайн: не ждём таймаута сети — сразу сохранённый пакет.
+      if (
+        saved &&
+        typeof navigator !== 'undefined' &&
+        navigator.onLine === false &&
+        (await savedCodeWorks(saved))
+      ) {
+        startFromCode(saved);
+        return;
+      }
+
       try {
         const response = await fetch(codeUrl, { credentials: 'omit' });
         if (!response.ok) {
@@ -286,19 +336,20 @@ export function GamePlayer({
         if (verdict === 'no-integrity') {
           console.warn('[FU_0006] в карточке нет code_integrity — пакет не проверен');
         }
-        const doc = buildPackageDocument({
-          code,
-          config: parsedConfig,
-          gameId,
-          userId,
-          spriteBaseUrl: spriteBaseUrl ?? '',
-        });
-        if (cancelled) return;
-        setPackageDoc(doc);
-        setPackageStatus('ready');
-        setPackageNote('');
+        startFromCode(code);
+        onPackageCodeRef.current?.(code);
       } catch (error) {
         if (cancelled) return;
+        // Макет 08: сеть пропала, а пакет уже лежит на устройстве — играем
+        // его. Это не откат на движок, а тот же пакет из локальной копии.
+        if (saved && (await savedCodeWorks(saved))) {
+          console.warn(
+            '[макет 08] пакет не скачался, играем сохранённый офлайн:',
+            error,
+          );
+          startFromCode(saved);
+          return;
+        }
         console.warn(
           '[FU_0006] пакет игры не запустился, играем встроенную сборку:',
           error,
