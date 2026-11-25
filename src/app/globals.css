@@ -172,6 +172,19 @@
     display: none;
   }
 
+  /*
+   * Появление шита и тоста без прозрачности: в макете hk-sheet/hk-toast
+   * начинаются с opacity: 0, но если браузер притормозил анимацию, элемент
+   * так и останется невидимым. Здесь движение есть, а видимость — сразу.
+   */
+  .sheet-rise {
+    animation: hk-rise 240ms var(--ease-boing);
+  }
+
+  .toast-drop {
+    animation: hk-drop 240ms var(--ease-boing);
+  }
+
   /* Текст поверх игры читается на любом фоне (макет: text-shadow). */
   .scrim-text {
     text-shadow: 0 2px 12px rgba(6, 6, 3, 0.8);
@@ -179,6 +192,24 @@
 
   .scrim-title {
     text-shadow: 0 2px 18px rgba(6, 6, 3, 0.85);
+  }
+}
+
+@keyframes hk-rise {
+  from {
+    transform: translateY(16px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes hk-drop {
+  from {
+    transform: translate(-50%, -10px);
+  }
+  to {
+    transform: translate(-50%, 0);
   }
 }
 

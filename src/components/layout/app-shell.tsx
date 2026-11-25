@@ -37,9 +37,12 @@ function navClass(active: boolean): string {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  // Полноэкранная лента — единственный маршрут без отступов и с обрезкой:
-  // карточка игры должна занимать весь экран, как в макете.
+  // Полноэкранная лента — маршрут без отступов и с обрезкой: карточка игры
+  // должна занимать весь экран, как в макете.
   const isFeed = pathname === '/feed';
+  // Профиль сам держит поля и ширину колонки 980 px из макета: sticky-шапка
+  // во всю ширину не получится, если отступы добавляет каркас.
+  const isFullWidth = isFeed || pathname === '/profile';
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-page text-ink">
@@ -117,10 +120,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         className={
           isFeed
             ? 'relative min-w-0 flex-1 overflow-hidden'
-            : 'min-w-0 flex-1 overflow-y-auto px-4 pt-6 pb-24 dt:px-8 dt:py-8'
+            : isFullWidth
+              ? 'min-w-0 flex-1 overflow-y-auto'
+              : 'min-w-0 flex-1 overflow-y-auto px-4 pt-6 pb-24 dt:px-8 dt:py-8'
         }
       >
-        {isFeed ? (
+        {isFullWidth ? (
           children
         ) : (
           <div className="mx-auto w-full max-w-5xl">{children}</div>

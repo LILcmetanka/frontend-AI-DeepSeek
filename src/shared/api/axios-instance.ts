@@ -99,6 +99,37 @@ export interface UpdateProfilePayload {
   avatar_url?: string;
 }
 
+/** GET /profile/me: профиль из токена. Пустые поля приходят как null. */
+export interface ProfileDto {
+  id: string;
+  username?: string | null;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  birth_date?: string | null;
+  avatar_url?: string | null;
+}
+
+/** GET /account/: аккаунт авторизации — почта, телефон, подтверждения. */
+export interface AccountDto {
+  id?: string;
+  phone?: string | null;
+  email?: string | null;
+  is_phone_verified?: boolean;
+  is_email_verified?: boolean;
+  role?: string | null;
+}
+
+export async function getMe(): Promise<ProfileDto> {
+  const { data } = await api.get<ProfileDto>('/profile/me');
+  return data;
+}
+
+export async function getAccount(): Promise<AccountDto> {
+  const { data } = await api.get<AccountDto>('/account/');
+  return data;
+}
+
 /**
  * DT_0005: частичное обновление профиля. Не переданное поле шлюз не меняет.
  * Пустое значение не шлём — контракт profile.v1 не умеет очищать поле.
