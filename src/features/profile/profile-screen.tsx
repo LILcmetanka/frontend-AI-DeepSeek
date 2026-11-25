@@ -10,10 +10,8 @@ import {
   SettingsIcon,
 } from '@/components/ui/icons';
 import { ProfileGameTile } from '@/features/profile/profile-game-tile';
-import {
-  ProfileEditSheet,
-  ProfileSavedToast,
-} from '@/features/profile/profile-form';
+import { ProfileEditSheet, ProfileSavedToast } from '@/features/profile/profile-form';
+import { ConnectionLost } from '@/components/ui/connection-lost';
 import {
   errorMessage,
   getAccount,
@@ -21,6 +19,7 @@ import {
   getLikedGameIds,
   getMe,
   getMyGames,
+  isNetworkError,
   type GameDto,
   type ProfileDto,
 } from '@/shared/api/axios-instance';
@@ -104,6 +103,17 @@ export function ProfileScreen() {
   }
 
   if (me.isError) {
+    // Макет 08: сеть — отдельное состояние с человеческим текстом.
+    if (isNetworkError(me.error)) {
+      return (
+        <div className="mx-auto w-full max-w-[980px] px-4">
+          <ConnectionLost
+            onRetry={() => void me.refetch()}
+            message="профиль не загрузился без сети — как только связь вернётся, всё откроется"
+          />
+        </div>
+      );
+    }
     return (
       <ProfileFrame title={errorMessage(me.error)}>
         <button
@@ -236,12 +246,9 @@ export function ProfileScreen() {
           isPending={myGames.isPending}
           error={myGames.isError ? errorMessage(myGames.error) : null}
           onRetry={() => void myGames.refetch()}
-          empty={
-            <>
-              пока нет игр — собери первую в AI Studio, она появится здесь
-            </>
-          }
-          emptyAction={{ href: '/create', label: 'открыть AI Studio' }}
+          emptyTitle="здесь пока пусто"
+          emptyText="первая игра появится сразу после ремикса. чужой шаблон подойдёт"
+          emptyAction={{ href: '/create', label: 'начать с ремикса' }}
         />
       )}
 
@@ -260,7 +267,8 @@ export function ProfileScreen() {
             if (likes.isError) void likes.refetch();
             else void likedGames.refetch();
           }}
-          empty={<>пока ничего не понравилось — отмечайте игры в ленте</>}
+          emptyTitle="здесь пока пусто"
+          emptyText="отмечайте игры в ленте — они появятся здесь"
           emptyAction={{ href: '/feed', label: 'в ленту' }}
         />
       )}
@@ -373,14 +381,16 @@ function GameGrid({
   isPending,
   error,
   onRetry,
-  empty,
+  emptyTitle,
+  emptyText,
   emptyAction,
 }: {
   games: GameDto[] | undefined;
   isPending: boolean;
   error: string | null;
   onRetry: () => void;
-  empty: React.ReactNode;
+  emptyTitle: string;
+  emptyText: string;
   emptyAction: { href: string; label: string };
 }) {
   if (error) {
@@ -412,14 +422,30 @@ function GameGrid({
   }
 
   if (!games || games.length === 0) {
+    // Пустая вкладка по макету 08: три пунктирные плитки 9:16, заголовок,
+    // объяснение и один выход. Никаких выдуманных цифр и карточек.
     return (
-      <div className="flex flex-col items-center gap-4 pt-14 pb-6 text-center">
-        <p className="max-w-[320px] text-[15px] leading-[1.5] font-semibold text-ink-soft">
-          {empty}
+      <div
+        data-empty-grid
+        className="flex flex-col items-center gap-[18px] pt-10 pb-6 text-center"
+      >
+        <div className="grid w-full max-w-[360px] grid-cols-3 gap-2 opacity-60">
+          {[0, 1, 2].map((index) => (
+            <span
+              key={index}
+              className="aspect-[9/16] rounded-lg border border-dashed border-line-strong bg-hover/50"
+            />
+          ))}
+        </div>
+        <p className="font-display text-[24px] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink">
+          {emptyTitle}
+        </p>
+        <p className="max-w-[320px] text-[14px] leading-[1.5] font-medium text-ink-soft">
+          {emptyText}
         </p>
         <Link
           href={emptyAction.href}
-          className="inline-flex h-12 items-center rounded-pill bg-acid px-5 text-[14px] font-extrabold text-peel-900 transition-colors duration-150 hover:bg-acid-hi"
+          className="inline-flex h-12 items-center rounded-pill bg-acid px-5 text-[14px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94]"
         >
           {emptyAction.label}
         </Link>

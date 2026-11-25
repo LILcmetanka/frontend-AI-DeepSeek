@@ -11,6 +11,7 @@ import {
 import { GameOverlays } from '@/features/game/game-overlays';
 import {
   errorMessage,
+  isNetworkError,
   isUnauthorized,
   sendEvent,
   type GameDto,
@@ -18,8 +19,11 @@ import {
 import { authorHandle } from '@/shared/lib/author';
 import { getGameCached } from '@/shared/lib/game-cache';
 import { GamePlayer, type PlayerEvent } from '@/shared/lib/game-player';
+import { readOfflineGame, saveOfflineGame } from '@/shared/lib/offline-games';
 import { formatDuration, saveSessionResult } from '@/shared/lib/session-result';
 import { useGameLikes } from '@/shared/lib/use-game-likes';
+import { useOnline } from '@/shared/lib/use-online';
+import { ConnectionLost } from '@/components/ui/connection-lost';
 
 /**
  * Экран игры — макет «02 Playing»: игра забрала экран, интерфейс ужат до HUD.
@@ -56,6 +60,14 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
 
   const data: GameDto | undefined = game.data;
   const { likedIds, toggleLike } = useGameLikes(`/feed/${gameId}`);
+  const online = useOnline();
+
+  // Офлайн-копия пакета: читается после монтирования — localStorage на
+  // сервере нет. Плеер использует её, только если сеть не отдала код.
+  const [offlineCode, setOfflineCode] = useState<string | null>(null);
+  useEffect(() => {
+    setOfflineCode(readOfflineGame(gameId)?.code ?? null);
+  }, [gameId]);
 
   const [elapsedSec, setElapsedSec] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
@@ -158,6 +170,14 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
             codeIntegrity={data.codeIntegrity}
             spriteBaseUrl={SPRITE_BASE_URL}
             engineMinVersion={data.engineMinVersion}
+            initialCode={offlineCode ?? undefined}
+            onPackageCode={(code) => {
+              setOfflineCode(code);
+              if (dataRef.current) {
+                // Макет 08: последние две сыгранные игры доступны без сети.
+                saveOfflineGame(dataRef.current, code);
+              }
+            }}
             onEvent={handlePlayerEvent}
           />
         )}
@@ -256,6 +276,13 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
               onNotify={notify}
             />
           </div>
+        ) : game.isError && isNetworkError(game.error) ? (
+          <div className="absolute inset-0 z-20 bg-peel-950/70">
+            <ConnectionLost
+              onRetry={() => void game.refetch()}
+              message="игра не загрузилась без сети — если открывали её раньше, копия откроется после повтора запроса"
+            />
+          </div>
         ) : (
           <div className="absolute inset-0 z-20 grid place-items-center px-8 text-center">
             <div className="flex max-w-[320px] flex-col items-center">
@@ -299,6 +326,15 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
               Плеер не настроен: не задан <code>NEXT_PUBLIC_GAME_URL</code>.
               Игра не запускается, но карточка и метаданные на месте.
             </div>
+          </div>
+        )}
+
+        {!online && data && (
+          <div
+            data-offline-banner
+            className="absolute top-[68px] left-1/2 z-40 -translate-x-1/2 rounded-pill bg-peel-25 px-4 py-2 font-mono text-[11px] font-bold whitespace-nowrap text-peel-900 shadow-pop"
+          >
+            офлайн — сохранённая копия
           </div>
         )}
 

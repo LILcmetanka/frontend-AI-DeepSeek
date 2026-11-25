@@ -1,4 +1,4 @@
-import { getGame, type GameDto } from '@/shared/api/axios-instance';
+import { getGame, isNetworkError, type GameDto } from '@/shared/api/axios-instance';
 
 /**
  * FU_0007, CL_0002: локальный кэш шаблона игры.
@@ -100,7 +100,18 @@ export async function getGameCached(
     return cached.game;
   }
 
-  const fresh = await getGame(gameId);
+  let fresh: GameDto;
+  try {
+    fresh = await getGame(gameId);
+  } catch (error) {
+    // Макет 08: без сети играем тем, что уже лежит на устройстве. Копия
+    // может быть старой, но пустой экран хуже старой карточки; если копии
+    // нет — ошибку отдаём наверх, страница покажет «связь пропала».
+    if (cached && isNetworkError(error)) {
+      return cached.game;
+    }
+    throw error;
+  }
 
   if (cached && cached.templateVersion === templateVersionOf(fresh)) {
     // Версия та же — обновляем отметку времени, содержимое не меняем.
