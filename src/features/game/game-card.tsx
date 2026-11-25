@@ -30,7 +30,8 @@ export function GameCard({ game, liked, onLike, onNotify }: GameCardProps) {
 
   return (
     <article className="relative h-full w-full overflow-hidden bg-stage select-none">
-      <StageBackdrop gameId={game.gameId} />
+      {/* В ленте сцена живая: карточка на экране — персонаж бежит. */}
+      <StageBackdrop gameId={game.gameId} config={game.config} animate />
 
       {/*
         Вся «сцена» — ссылка на игру: в макете клик по геймплею запускает

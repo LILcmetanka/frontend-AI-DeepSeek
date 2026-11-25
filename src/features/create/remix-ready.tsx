@@ -56,7 +56,7 @@ export function RemixReady({
       <div className="flex w-full max-w-[1000px] flex-col items-stretch gap-7 dt:flex-row dt:items-center dt:gap-11">
         {/* карточка новой игры */}
         <div className="remix-preview relative mx-auto aspect-[9/16] h-[46dvh] w-auto max-w-full flex-none overflow-hidden rounded-xl bg-peel-950 dt:h-auto dt:w-full dt:max-w-[420px]">
-          <StageBackdrop gameId={gameId} />
+          <StageBackdrop gameId={gameId} config={data?.config} />
 
           <div
             aria-hidden

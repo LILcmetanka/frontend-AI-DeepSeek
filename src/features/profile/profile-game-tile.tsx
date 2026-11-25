@@ -25,6 +25,7 @@ export function ProfileGameTile({ game }: { game: GameDto }) {
     >
       <StageBackdrop
         gameId={game.gameId}
+        config={game.config}
         className="origin-bottom scale-[1.35] brightness-125"
       />
 

@@ -155,7 +155,7 @@ export function GamePicker({
                       selected ? 'border-accent-line' : 'border-line hover:border-line-strong'
                     }`}
                   >
-                    <StageBackdrop gameId={game.gameId} />
+                    <StageBackdrop gameId={game.gameId} config={game.config} />
                     <span
                       aria-hidden
                       className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%]"

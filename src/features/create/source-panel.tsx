@@ -32,7 +32,7 @@ export function SourcePanel({
     <div className="relative flex min-h-[240px] flex-col overflow-hidden border-b border-line bg-stage dt:min-h-full dt:border-r dt:border-b-0">
       {game ? (
         <>
-          <StageBackdrop gameId={game.gameId} />
+          <StageBackdrop gameId={game.gameId} config={game.config} />
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"

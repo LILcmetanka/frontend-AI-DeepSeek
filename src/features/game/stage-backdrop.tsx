@@ -1,115 +1,177 @@
+'use client';
+
+import { useEffect, useMemo, useRef } from 'react';
+import {
+  drawPreviewFrame,
+  sceneFor,
+  STILL_FRAME_SECONDS,
+  type PreviewScene,
+} from '@/shared/lib/game-preview';
+
 /**
- * Фон карточки игры. Превью геймплея API не отдаёт: в ответе ленты только
- * конфиг, готового кадра или canvas нет. Поэтому рисуем декоративную
- * «сцену» из палитры макета (силуэт города + сетка пола), а не
- * притворяемся скриншотом игры.
+ * Фон карточки игры — та же сцена, что в макете (`game-render.js`).
  *
- * Вынесено из карточки ленты, потому что та же сцена нужна сетке игр
- * в профиле: один рисунок на два экрана.
+ * Превью геймплея API не отдаёт: в ответе ленты только конфиг и код пакета,
+ * готового кадра нет. Поэтому карточка рисует сцену того же вида, что и сама
+ * игра (бегун, леталка, шутер…), — и честно, и не пустой прямоугольник.
+ *
+ * Когда сцена движется:
+ * - в ленте (`animate`) — пока карточка на экране, вкладка активна и
+ *   пользователь не просил уменьшить движение (`prefers-reduced-motion`);
+ * - везде ещё (сетки профиля и поиска, панели ремикса) — один неподвижный
+ *   кадр: тридцать канвасов в сетке с requestAnimationFrame не нужны.
+ *
+ * Рисунок один на все экраны: разница только в том, идёт ли время.
  */
 
-/** Палитры «города» из макета: выбор детерминирован по id игры. */
-const STAGES = [
-  { bg: '#0D0D07', far: '#17170F', mid: '#26261F', accent: '#C6FF2E' },
-  { bg: '#17170F', far: '#26261F', mid: '#3A3A32', accent: '#FFE23D' },
-  { bg: '#060603', far: '#17170F', mid: '#26261F', accent: '#C6FF2E' },
-  { bg: '#0D0D07', far: '#26261F', mid: '#3A3A32', accent: '#FFE23D' },
-];
-
-function hashGameId(value: string): number {
-  let hash = 0;
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-  }
-  return hash;
+interface StageBackdropProps {
+  gameId: string;
+  /** Конфиг игры (`GameDto.config`): по нему выбирается вид сцены. */
+  config?: string | null;
+  /** Двигать сцену, пока карточка видна. По умолчанию — статичный кадр. */
+  animate?: boolean;
+  className?: string;
 }
 
 export function StageBackdrop({
   gameId,
+  config,
+  animate = false,
   className = '',
-}: {
-  gameId: string;
-  className?: string;
-}) {
-  const seed = hashGameId(gameId);
-  const palette = STAGES[seed % STAGES.length];
+}: StageBackdropProps) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const scene = useMemo<PreviewScene>(() => sceneFor(gameId, config), [gameId, config]);
 
-  const farBlocks = Array.from({ length: 9 }, (_, index) => ({
-    key: `far-${index}`,
-    left: (index * 12 + (seed % 5)) % 100,
-    width: 9 + ((seed >> (index % 8)) % 7),
-    height: 6 + (((seed >> (index % 7)) + index * 3) % 16),
-  }));
-  const midBlocks = Array.from({ length: 6 }, (_, index) => ({
-    key: `mid-${index}`,
-    left: (index * 18 + (seed % 9)) % 100,
-    width: 13 + ((seed >> (index % 6)) % 8),
-    height: 4 + (((seed >> (index % 5)) + index * 2) % 8),
-  }));
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    let frame = 0;
+    let startedAt = 0;
+    let visible = false;
+    let disposed = false;
+    // Размер меряем на старте и при ресайзе: getBoundingClientRect каждый
+    // кадр заставлял бы браузер пересчитывать раскладку 60 раз в секунду.
+    let width = 0;
+    let height = 0;
+
+    const reduced =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const measure = (): void => {
+      const rect = canvas.getBoundingClientRect();
+      width = Math.round(rect.width);
+      height = Math.round(rect.height);
+    };
+
+    const paint = (seconds: number): void => {
+      if (!width || !height) return;
+
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      if (canvas.width !== Math.round(width * ratio) || canvas.height !== Math.round(height * ratio)) {
+        canvas.width = Math.round(width * ratio);
+        canvas.height = Math.round(height * ratio);
+      }
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      drawPreviewFrame(ctx, width, height, seconds, scene);
+    };
+
+    measure();
+
+    const resize =
+      typeof ResizeObserver === 'function'
+        ? new ResizeObserver(() => {
+            measure();
+            // В движении следующий кадр сам попадёт в новый размер.
+            if (!frame) paint(STILL_FRAME_SECONDS);
+          })
+        : null;
+    resize?.observe(canvas);
+
+    // Статичный кадр: рисуем сразу и перерисовываем при смене размера.
+    if (!animate || reduced) {
+      paint(STILL_FRAME_SECONDS);
+      return () => {
+        disposed = true;
+        resize?.disconnect();
+      };
+    }
+
+    const stop = (): void => {
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    };
+
+    const tick = (now: number): void => {
+      if (disposed || !visible || document.visibilityState === 'hidden') {
+        frame = 0;
+        return;
+      }
+      if (!startedAt) startedAt = now;
+      paint((now - startedAt) / 1000);
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    const start = (): void => {
+      if (frame || !visible) return;
+      frame = window.requestAnimationFrame(tick);
+    };
+
+    // Сцена идёт, только пока карточка в кадре: в ленте это одна-две карточки.
+    const observer =
+      typeof IntersectionObserver === 'function'
+        ? new IntersectionObserver(
+            (entries) => {
+              visible = entries.some((entry) => entry.isIntersecting);
+              if (visible) {
+                startedAt = 0;
+                start();
+              } else {
+                stop();
+              }
+            },
+            { threshold: 0.25 },
+          )
+        : null;
+
+    if (observer) {
+      observer.observe(canvas);
+    } else {
+      visible = true;
+      start();
+    }
+
+    // Вкладка в фоне: rAF и так почти не идёт, но останавливаем явно.
+    const onVisibility = (): void => {
+      if (document.visibilityState === 'hidden') {
+        stop();
+      } else {
+        startedAt = 0;
+        start();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      disposed = true;
+      stop();
+      observer?.disconnect();
+      resize?.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [animate, scene]);
 
   return (
     <div
       aria-hidden
       className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
-      style={{ background: palette.bg }}
     >
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `radial-gradient(120% 70% at 50% 72%, ${palette.accent}22 0%, rgba(6,6,3,0) 62%)`,
-        }}
-      />
-
-      {farBlocks.map((block) => (
-        <div
-          key={block.key}
-          className="absolute"
-          style={{
-            left: `${block.left}%`,
-            bottom: '30%',
-            width: `${block.width}%`,
-            height: `${block.height}%`,
-            background: palette.far,
-          }}
-        />
-      ))}
-      {midBlocks.map((block) => (
-        <div
-          key={block.key}
-          className="absolute"
-          style={{
-            left: `${block.left}%`,
-            bottom: '30%',
-            width: `${block.width}%`,
-            height: `${block.height}%`,
-            background: palette.mid,
-          }}
-        />
-      ))}
-
-      <div
-        className="absolute inset-x-0 bottom-0 h-[30%]"
-        style={{ background: palette.mid }}
-      />
-      <div
-        className="absolute inset-x-0 bottom-[30%] h-[3px]"
-        style={{ background: palette.accent }}
-      />
-      <div
-        className="absolute inset-x-0 bottom-0 h-[30%]"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(90deg, rgba(242,242,232,0.08) 0 3px, transparent 3px 46px)',
-        }}
-      />
-      <div
-        className="absolute inset-x-[-25%] bottom-0 h-[30%] origin-bottom"
-        style={{
-          transform: 'perspective(240px) rotateX(58deg)',
-          backgroundImage:
-            'repeating-linear-gradient(0deg, rgba(242,242,232,0.08) 0 2px, transparent 2px 42px), repeating-linear-gradient(90deg, rgba(242,242,232,0.08) 0 2px, transparent 2px 42px)',
-        }}
-      />
+      <canvas ref={canvasRef} className="block h-full w-full" />
     </div>
   );
 }
