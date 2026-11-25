@@ -6,6 +6,9 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    // Тесты импортируют модули с явным .ts: Node исполняет их напрямую
+    // (node --test, type stripping), без сборщика и новых пакетов.
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
