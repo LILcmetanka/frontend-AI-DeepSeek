@@ -11,7 +11,9 @@
  * Чего здесь нет и почему: настоящего скриншота игры. API не отдаёт ни
  * кадра, ни превью-картинки (`GET /feed` возвращает конфиг и код пакета),
  * поэтому карточка рисует сцену того же вида, что и сама игра, а не
- * притворяется её фотографией.
+ * притворяется её фотографией. Исключение — `preview.url` в конфиге: его
+ * пишет оркестратор, когда генератор нарисовал настоящий базовый кадр
+ * (`previewImageUrl` ниже). Такой кадр главнее нарисованной сцены.
  *
  * Модуль чистый: ни DOM, ни React, ни `@/`-алиасов — чтобы его можно было
  * проверять обычным `node --test` (frontend, раздел «Тесты»).
@@ -98,6 +100,23 @@ export function pickPreviewKind(config?: string | null): PreviewKind {
     if (hint.pattern.test(haystack)) return hint.kind;
   }
   return DEFAULT_PREVIEW_KIND;
+}
+
+/**
+ * Адрес настоящего кадра игры из конфига (`preview.url`).
+ *
+ * Кадр пишет оркестратор, когда генератор нарисовал базовую картинку: это
+ * тот самый кадр, с которого начинается забег, — лучше нарисованной сцены.
+ * Принимаем только абсолютный http(s): относительный путь в конфиге может
+ * прийти от шаблона и увёл бы картинку на чужой origin.
+ */
+export function previewImageUrl(config?: string | null): string | null {
+  const parsed = parseConfig(config);
+  if (!parsed) return null;
+  const url = readString(parsed, ['preview', 'url']);
+  if (!url) return null;
+  const trimmed = url.trim();
+  return /^https?:\/\/[^/?#]+/.test(trimmed) ? trimmed : null;
 }
 
 /** Сцена игры: вид из конфига, палитра и зерно — из id. */

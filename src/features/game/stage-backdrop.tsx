@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   drawPreviewFrame,
+  previewImageUrl,
   sceneFor,
   STILL_FRAME_SECONDS,
   type PreviewScene,
@@ -11,9 +12,10 @@ import {
 /**
  * Фон карточки игры — та же сцена, что в макете (`game-render.js`).
  *
- * Превью геймплея API не отдаёт: в ответе ленты только конфиг и код пакета,
- * готового кадра нет. Поэтому карточка рисует сцену того же вида, что и сама
- * игра (бегун, леталка, шутер…), — и честно, и не пустой прямоугольник.
+ * Если конфиг несёт настоящий кадр генерации (`preview.url`), карточка
+ * показывает его: это картинка из самой игры, а не её имитация. Нет кадра
+ * или он не загрузился — рисуем сцену того же вида, что и игра (бегун,
+ * леталка, шутер…), — и честно, и не пустой прямоугольник.
  *
  * Когда сцена движется:
  * - в ленте (`animate`) — пока карточка на экране, вкладка активна и
@@ -26,7 +28,7 @@ import {
 
 interface StageBackdropProps {
   gameId: string;
-  /** Конфиг игры (`GameDto.config`): по нему выбирается вид сцены. */
+  /** Конфиг игры (`GameDto.config`): по нему выбирается вид сцены и кадр. */
   config?: string | null;
   /** Двигать сцену, пока карточка видна. По умолчанию — статичный кадр. */
   animate?: boolean;
@@ -41,6 +43,14 @@ export function StageBackdrop({
 }: StageBackdropProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const scene = useMemo<PreviewScene>(() => sceneFor(gameId, config), [gameId, config]);
+  const imageUrl = useMemo(() => previewImageUrl(config), [config]);
+  // Кадр не загрузился (файла нет, бакет пуст, сеть отвалилась) — остаётся сцена.
+  const [imageFailed, setImageFailed] = useState(false);
+  const showImage = imageUrl !== null && !imageFailed;
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [imageUrl]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -92,7 +102,8 @@ export function StageBackdrop({
     resize?.observe(canvas);
 
     // Статичный кадр: рисуем сразу и перерисовываем при смене размера.
-    if (!animate || reduced) {
+    // Кадр генерации поверх сцены — тоже повод не крутить rAF.
+    if (showImage || !animate || reduced) {
       paint(STILL_FRAME_SECONDS);
       return () => {
         disposed = true;
@@ -164,7 +175,7 @@ export function StageBackdrop({
       resize?.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [animate, scene]);
+  }, [animate, scene, showImage]);
 
   return (
     <div
@@ -172,6 +183,18 @@ export function StageBackdrop({
       className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
     >
       <canvas ref={canvasRef} className="block h-full w-full" />
+      {showImage ? (
+        // Кадр генерации из S3: настоящая картинка игры. Не загрузился —
+        // срабатывает onError, и остаётся нарисованная сцена.
+        // eslint-disable-next-line @next/next/no-img-element -- кадр приходит из конфига игры, домен не наш
+        <img
+          src={imageUrl}
+          alt=""
+          data-preview-frame
+          className="absolute inset-0 h-full w-full object-cover"
+          onError={() => setImageFailed(true)}
+        />
+      ) : null}
     </div>
   );
 }
