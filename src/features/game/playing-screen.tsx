@@ -172,8 +172,8 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
 
         <header className="absolute inset-x-0 top-0 z-30 flex items-center gap-2.5 p-4">
           <Link
-            href="/feed"
-            aria-label="назад к ленте"
+            href={`/feed/${gameId}/result`}
+            aria-label="выход: итог сессии"
             className="grid h-10 w-10 flex-none place-items-center rounded-pill bg-[rgba(6,6,3,0.55)] text-peel-25 backdrop-blur-[12px] transition-[background,transform] duration-150 hover:bg-[rgba(6,6,3,0.78)] active:scale-[0.94]"
           >
             <ArrowLeftIcon className="h-[19px] w-[19px]" />
