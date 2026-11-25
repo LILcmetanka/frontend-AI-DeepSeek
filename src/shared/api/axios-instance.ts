@@ -91,6 +91,24 @@ export interface ErrorDto {
   error?: { code?: string; message?: string };
 }
 
+/** DT_0005: поля профиля, которые можно менять. */
+export interface UpdateProfilePayload {
+  username?: string;
+  name?: string;
+  birth_date?: string;
+  avatar_url?: string;
+}
+
+/**
+ * DT_0005: частичное обновление профиля. Не переданное поле шлюз не меняет.
+ * Пустое значение не шлём — контракт profile.v1 не умеет очищать поле.
+ */
+export async function updateProfile(
+  payload: UpdateProfilePayload,
+): Promise<void> {
+  await api.patch("/profile/me", payload);
+}
+
 export async function getGame(gameId: string): Promise<GameDto> {
   const { data } = await api.get<GameDto>(`/feed/${gameId}`);
   return data;

@@ -12,6 +12,7 @@ import {
   type GameDto,
 } from '@/shared/api/axios-instance';
 import { RequireAuth } from '@/shared/lib/require-auth';
+import { ProfileForm } from './profile-form';
 
 interface MeDto {
   id: string;
@@ -19,6 +20,8 @@ interface MeDto {
   name?: string | null;
   email?: string | null;
   phone?: string | null;
+  birth_date?: string | null;
+  avatar_url?: string | null;
 }
 
 /** Вкладки профиля: FU_0026 «Мои игры», FU_0028 «Понравившиеся». */
@@ -34,6 +37,7 @@ export default function ProfilePage() {
 
 function ProfileContent() {
   const [tab, setTab] = useState<Tab>('mine');
+  const [editing, setEditing] = useState(false);
 
   const me = useQuery({
     queryKey: ['me'],
@@ -63,6 +67,17 @@ function ProfileContent() {
 
       {me.data && (
         <dl className="space-y-2 text-sm">
+          {me.data.avatar_url && (
+            <div className="flex items-center gap-3">
+              <dt className="w-28 text-zinc-400">Аватар</dt>
+              {/* eslint-disable-next-line @next/next/no-img-element -- ссылка приходит из профиля, домены заранее неизвестны */}
+              <img
+                src={me.data.avatar_url}
+                alt="Аватар"
+                className="h-12 w-12 rounded-full border border-zinc-700 object-cover"
+              />
+            </div>
+          )}
           <div className="flex gap-3">
             <dt className="w-28 text-zinc-400">Логин</dt>
             <dd>{me.data.username ?? '—'}</dd>
@@ -70,6 +85,10 @@ function ProfileContent() {
           <div className="flex gap-3">
             <dt className="w-28 text-zinc-400">Имя</dt>
             <dd>{me.data.name ?? '—'}</dd>
+          </div>
+          <div className="flex gap-3">
+            <dt className="w-28 text-zinc-400">Дата рождения</dt>
+            <dd>{me.data.birth_date ?? '—'}</dd>
           </div>
           <div className="flex gap-3">
             <dt className="w-28 text-zinc-400">Email</dt>
@@ -80,6 +99,22 @@ function ProfileContent() {
             <dd>{me.data.phone ?? '—'}</dd>
           </div>
         </dl>
+      )}
+
+      {me.data && (
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setEditing((value) => !value)}
+            className="rounded border border-zinc-700 px-3 py-1 text-sm text-zinc-200"
+            aria-expanded={editing}
+          >
+            {editing ? 'Свернуть' : 'Редактировать профиль'}
+          </button>
+          {editing && (
+            <ProfileForm profile={me.data} onSaved={() => setEditing(false)} />
+          )}
+        </div>
       )}
 
       <div className="flex gap-2" role="tablist">
