@@ -109,7 +109,7 @@ export function ProfileScreen() {
         <div className="mx-auto w-full max-w-[980px] px-4">
           <ConnectionLost
             onRetry={() => void me.refetch()}
-            message="профиль не загрузился без сети — как только связь вернётся, всё откроется"
+            message="профиль не загрузился: сервер не ответил. проверьте связь и попробуйте снова"
           />
         </div>
       );

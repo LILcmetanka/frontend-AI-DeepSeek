@@ -280,7 +280,7 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
           <div className="absolute inset-0 z-20 bg-peel-950/70">
             <ConnectionLost
               onRetry={() => void game.refetch()}
-              message="игра не загрузилась без сети — если открывали её раньше, копия откроется после повтора запроса"
+              message="игра не загрузилась: сервер не ответил. если открывали её раньше, повтор возьмёт сохранённую копию"
             />
           </div>
         ) : (
