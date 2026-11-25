@@ -28,13 +28,7 @@ function todayUtc(): string {
  * birth_date не позже сегодняшней, avatar_url ≤ 255.
  * Контракт profile.v1 не умеет очищать поле: пустое значение просто не шлём.
  */
-export function ProfileForm({
-  profile,
-  onSaved,
-}: {
-  profile: ProfileValues;
-  onSaved?: () => void;
-}) {
+export function ProfileForm({ profile }: { profile: ProfileValues }) {
   const queryClient = useQueryClient();
   const [username, setUsername] = useState(profile.username ?? '');
   const [name, setName] = useState(profile.name ?? '');
@@ -45,10 +39,10 @@ export function ProfileForm({
 
   const save = useMutation({
     mutationFn: (payload: UpdateProfilePayload) => updateProfile(payload),
+    // Форму не закрываем: иначе сообщение «Профиль сохранён» никто не увидит.
     onSuccess: async () => {
       setSaved(true);
       await queryClient.invalidateQueries({ queryKey: ['me'] });
-      onSaved?.();
     },
   });
 

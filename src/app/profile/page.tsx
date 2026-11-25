@@ -112,7 +112,7 @@ function ProfileContent() {
             {editing ? 'Свернуть' : 'Редактировать профиль'}
           </button>
           {editing && (
-            <ProfileForm profile={me.data} onSaved={() => setEditing(false)} />
+            <ProfileForm profile={me.data} />
           )}
         </div>
       )}
