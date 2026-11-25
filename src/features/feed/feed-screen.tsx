@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -17,17 +12,14 @@ import {
 } from '@/components/ui/icons';
 import { GameCard } from '@/features/game/game-card';
 import {
-  addLike,
   errorMessage,
   getFeed,
   getGame,
-  getLikedGameIds,
   isUnauthorized,
-  removeLike,
   type GameDto,
 } from '@/shared/api/axios-instance';
 import { getAccessToken } from '@/shared/lib/auth';
-import { useSignedIn } from '@/shared/lib/use-signed-in';
+import { useGameLikes } from '@/shared/lib/use-game-likes';
 
 /**
  * Лента как в макете «Главная · лента»: одна игра на весь экран,
@@ -48,7 +40,6 @@ const USER_LIMIT = 10;
 export function FeedScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const signedIn = useSignedIn();
   const [tab, setTab] = useState<Tab>('rec');
   const [activeIndex, setActiveIndex] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
@@ -78,53 +69,9 @@ export function FeedScreen() {
   );
 
   /* ---------- лайки ---------- */
-  // Шлюз отдаёт только id понравившихся и 204 на POST/DELETE, поэтому
-  // состояние сердца берём из GET /likes, а число не рисуем вовсе.
-  const likesQuery = useQuery({
-    queryKey: ['likes'],
-    queryFn: () => getLikedGameIds(100),
-    enabled: signedIn,
-    retry: false,
-    staleTime: 60_000,
-  });
-
-  const likedIds = useMemo(
-    () => new Set(likesQuery.data ?? []),
-    [likesQuery.data],
-  );
-
-  const likeMutation = useMutation({
-    mutationFn: async ({
-      gameId,
-      next,
-    }: {
-      gameId: string;
-      next: boolean;
-    }): Promise<void> => {
-      if (next) {
-        await addLike(gameId);
-        return;
-      }
-      await removeLike(gameId);
-    },
-    onMutate: async ({ gameId, next }) => {
-      await queryClient.cancelQueries({ queryKey: ['likes'] });
-      const previous = queryClient.getQueryData<string[]>(['likes']) ?? [];
-      queryClient.setQueryData<string[]>(
-        ['likes'],
-        next
-          ? Array.from(new Set([...previous, gameId]))
-          : previous.filter((id) => id !== gameId),
-      );
-      return { previous };
-    },
-    onError: (_error, _vars, context) => {
-      if (context) queryClient.setQueryData(['likes'], context.previous);
-    },
-    onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: ['likes'] });
-    },
-  });
+  // Один хук на ленту и экран игры: список id понравившихся из GET /likes,
+  // счётчика лайков в API нет — число не рисуем.
+  const { likedIds, toggleLike } = useGameLikes('/feed');
 
   const notify = useCallback((message: string) => {
     setToast(message);
@@ -235,11 +182,7 @@ export function FeedScreen() {
   }, [activeIndex, games, router, goTo]);
 
   function handleLike(gameId: string): void {
-    if (!signedIn) {
-      router.push('/login?next=/feed');
-      return;
-    }
-    likeMutation.mutate({ gameId, next: !likedIds.has(gameId) });
+    toggleLike(gameId);
   }
 
   const showCards = tab === 'rec' && games.length > 0;
