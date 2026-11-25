@@ -170,6 +170,11 @@ export interface GamePlayerProps {
   engineMinVersion?: string;
   /** Версия сборки движка, которую реально запускаем. */
   engineVersion?: string;
+  /**
+   * Игра занимает весь родительский блок (`.feed-frame` на экране игры),
+   * а не 60–70 `vh` внутри страницы. Родитель должен быть `relative`.
+   */
+  fill?: boolean;
   onEvent: (event: PlayerEvent) => void;
   /** Вызывается один раз после `hookster:mount` с замером готовности. */
   onReady?: (readyMs: number) => void;
@@ -193,6 +198,7 @@ export function GamePlayer({
   spriteBaseUrl,
   engineMinVersion,
   engineVersion = DEFAULT_ENGINE_VERSION,
+  fill = false,
   onEvent,
   onReady,
 }: GamePlayerProps) {
@@ -408,9 +414,17 @@ export function GamePlayer({
         ? `fallback:${packageNote || 'загрузка'}`
         : 'engine';
 
+  // Экран игры: игра занимает весь кадр, оверлеи лежат поверх.
+  const shellClass = fill
+    ? 'absolute inset-0 z-0 overflow-hidden bg-peel-950'
+    : 'relative w-full overflow-hidden rounded border border-zinc-800 bg-black';
+  const frameClass = fill
+    ? 'h-full w-full'
+    : 'h-[60vh] min-h-[320px] w-full sm:h-[70vh] sm:min-h-[420px]';
+
   return (
     <div
-      className="relative w-full overflow-hidden rounded border border-zinc-800 bg-black"
+      className={shellClass}
       data-ready-ms={readyMs ?? ''}
       data-player-mode={playerMode}
     >
@@ -422,18 +436,18 @@ export function GamePlayer({
           srcDoc={packageDoc}
           sandbox="allow-scripts"
           title="Игра"
-          className="h-[60vh] min-h-[320px] w-full sm:h-[70vh] sm:min-h-[420px]"
+          className={frameClass}
         />
       ) : packageStatus === 'loading' ? (
         // Пока тянем пакет, встроенную сборку не грузим: лишний запрос на 8081
         // никому не нужен, если пакет вот-вот запустится.
-        <div className="h-[60vh] min-h-[320px] w-full sm:h-[70vh] sm:min-h-[420px]" />
+        <div className={frameClass} />
       ) : (
         <iframe
           ref={frameRef}
           src={`${gameUrl}?embed=1&gameId=${encodeURIComponent(gameId)}&userId=${encodeURIComponent(userId)}`}
           title="Игра"
-          className="h-[60vh] min-h-[320px] w-full sm:h-[70vh] sm:min-h-[420px]"
+          className={frameClass}
           onLoad={() => {
             // Страховка, если ready пришёл раньше, чем мы повесили обработчик.
             postMount();

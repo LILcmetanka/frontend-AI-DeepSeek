@@ -38,8 +38,9 @@ function navClass(active: boolean): string {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   // Полноэкранная лента — маршрут без отступов и с обрезкой: карточка игры
-  // должна занимать весь экран, как в макете.
-  const isFeed = pathname === '/feed';
+  // должна занимать весь экран, как в макете. Экран игры (`/feed/{id}`) тоже
+  // полноэкранный: игра живёт в кадре 9:16, а не в колонке с отступами.
+  const isFeed = pathname === '/feed' || pathname.startsWith('/feed/');
   // Профиль сам держит поля и ширину колонки 980 px из макета: sticky-шапка
   // во всю ширину не получится, если отступы добавляет каркас.
   // AI Remix сам держит карточку 1060 px из макета 06 — по той же причине.
