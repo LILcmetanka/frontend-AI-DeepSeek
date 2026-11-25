@@ -8,6 +8,7 @@ import {
   errorMessage,
   getFeed,
   getGame,
+  isUnauthorized,
   type FeedCategory,
   type GameDto,
 } from '@/shared/api/axios-instance';
@@ -100,7 +101,21 @@ export default function FeedPage() {
 
       {feed.isLoading && <p className="text-zinc-400">Загружаем ленту…</p>}
 
-      {feed.isError && (
+      {feed.isError && isUnauthorized(feed.error) && (
+        <div className="space-y-3">
+          <p className="rounded border border-zinc-700 bg-zinc-900 p-3 text-sm text-zinc-300">
+            Лента в этом режиме доступна только после входа.
+          </p>
+          <Link
+            href="/login?next=/feed"
+            className="inline-block rounded bg-emerald-500 px-4 py-2 text-sm font-medium text-zinc-950"
+          >
+            Войти
+          </Link>
+        </div>
+      )}
+
+      {feed.isError && !isUnauthorized(feed.error) && (
         <div className="space-y-3">
           <p className="rounded border border-amber-700 bg-amber-950/40 p-3 text-sm text-amber-200">
             {errorMessage(feed.error)}
