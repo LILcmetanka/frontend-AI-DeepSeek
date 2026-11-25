@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { WandIcon } from '@/components/ui/icons';
+import { TraceIdNote } from '@/components/ui/trace-id-note';
 import type { GameDto } from '@/shared/api/axios-instance';
 
 /**
@@ -51,6 +52,7 @@ export function RemixForm({
   initialPrompt,
   pending,
   errorText,
+  traceError,
   onPick,
   onStart,
 }: {
@@ -58,6 +60,8 @@ export function RemixForm({
   initialPrompt: string;
   pending: boolean;
   errorText: string | null;
+  /** Сама ошибка запроса: из неё берём код запроса (Э27). */
+  traceError?: unknown;
   onPick: () => void;
   onStart: (prompt: string) => void;
 }) {
@@ -174,6 +178,9 @@ export function RemixForm({
           {errorText}
         </p>
       )}
+
+      {/* Код запроса из ответа шлюза: по нему ищут инцидент (Э27). */}
+      <TraceIdNote error={traceError} />
 
       <div className="flex flex-col gap-2.5">
         <div className="flex flex-col gap-2.5 dt:flex-row dt:items-center">

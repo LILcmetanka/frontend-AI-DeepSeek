@@ -223,6 +223,7 @@ export function CreateScreen({ initialGameId }: { initialGameId: string }) {
                 initialPrompt={request?.prompt ?? ''}
                 pending={generate.isPending}
                 errorText={generate.isError ? generateErrorText(generate.error) : null}
+                traceError={generate.error}
                 onPick={() => setPickerOpen(true)}
                 onStart={(prompt) => start(gameId, prompt)}
               />

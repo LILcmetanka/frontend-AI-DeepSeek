@@ -24,6 +24,7 @@ import { formatDuration, saveSessionResult } from '@/shared/lib/session-result';
 import { useGameLikes } from '@/shared/lib/use-game-likes';
 import { useOnline } from '@/shared/lib/use-online';
 import { ConnectionLost } from '@/components/ui/connection-lost';
+import { TraceIdNote } from '@/components/ui/trace-id-note';
 
 /**
  * Экран игры — макет «02 Playing»: игра забрала экран, интерфейс ужат до HUD.
@@ -298,6 +299,9 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
                       ? 'Эта игра доступна после входа'
                       : errorMessage(game.error)}
                   </p>
+                  {!isUnauthorized(game.error) && (
+                    <TraceIdNote error={game.error} />
+                  )}
                   <div className="mt-4 flex items-center gap-2">
                     {isUnauthorized(game.error) && (
                       <Link
