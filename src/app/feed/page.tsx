@@ -3,7 +3,7 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   errorMessage,
   getFeed,
@@ -20,16 +20,20 @@ const CATEGORIES: Array<{ id: FeedCategory; label: string }> = [
 ];
 
 /**
- * Лента: вертикальный список игр, следующая страница подгружается, когда
- * доходишь до конца. Это не полноэкранный свайп из ТЗ (CL_0001): подгрузка
- * есть, сам жест — отдельная задача.
+ * Лента мини-игр (CL_0001): полноэкранные карточки в лотке со снап-прокруткой.
+ * На телефоне листается свайпом (нативный скролл + `scroll-snap`), на
+ * десктопе — колесом, ↑/↓, PageUp/PageDown; Enter открывает активную карточку.
+ * Следующая страница подгружается, когда доходишь до конца (NF_0002/CL_0001).
  */
 export default function FeedPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [category, setCategory] = useState<FeedCategory>('for_you');
   const [gameId, setGameId] = useState('');
+  const [activeIndex, setActiveIndex] = useState(0);
+  const railRef = useRef<HTMLUListElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const cardRefs = useRef<Array<HTMLLIElement | null>>([]);
 
   const feed = useInfiniteQuery({
     queryKey: ['feed', category],
@@ -42,28 +46,116 @@ export default function FeedPage() {
 
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = feed;
 
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return undefined;
-
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting) && hasNextPage) {
-        void fetchNextPage();
-      }
-    });
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, category]);
-
   const games: GameDto[] = useMemo(
     () => feed.data?.pages.flatMap((page) => page.games) ?? [],
     [feed.data?.pages],
   );
 
-  // NF_0002: клиент заранее загружает не менее двух следующих игр. Каждый
-  // prefetch кладёт карточку в тот же ключ ['game', id], что читает страница
-  // игры, поэтому переход открывается из кэша, без запроса. Грузим все
-  // карточки текущей выдачи: их 10–20, а «следующие два» тогда есть от любой.
+  // Новая категория — лента начинается сверху, а не с середины прошлой.
+  useEffect(() => {
+    setActiveIndex(0);
+    railRef.current?.scrollTo({ top: 0 });
+  }, [category]);
+
+  // Какая карточка сейчас на экране: подсветка и индикатор позиции.
+  useEffect(() => {
+    const root = railRef.current;
+    if (!root) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const index = Number((entry.target as HTMLElement).dataset.index);
+          if (!Number.isNaN(index)) setActiveIndex(index);
+        }
+      },
+      { root, threshold: 0.6 },
+    );
+    for (const card of cardRefs.current) {
+      if (card) observer.observe(card);
+    }
+    return () => observer.disconnect();
+  }, [games.length]);
+
+  // Подгрузка следующей страницы, когда дошли до конца лотка.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting) && hasNextPage) {
+          void fetchNextPage();
+        }
+      },
+      { root: railRef.current ?? undefined },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, category]);
+
+  const scrollTo = useCallback(
+    (index: number) => {
+      const clamped = Math.max(0, Math.min(index, games.length - 1));
+      const card = cardRefs.current[clamped];
+      if (!card) return;
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      card.scrollIntoView({
+        behavior: reduced ? 'auto' : 'smooth',
+        block: 'start',
+      });
+      setActiveIndex(clamped);
+    },
+    [games.length],
+  );
+
+  // Клавиатура: ↑/↓ и PageUp/PageDown листают, Enter открывает активную игру.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+      if (games.length === 0) return;
+
+      switch (event.key) {
+        case 'ArrowDown':
+        case 'PageDown':
+          event.preventDefault();
+          scrollTo(activeIndex + 1);
+          break;
+        case 'ArrowUp':
+        case 'PageUp':
+          event.preventDefault();
+          scrollTo(activeIndex - 1);
+          break;
+        case 'Home':
+          event.preventDefault();
+          scrollTo(0);
+          break;
+        case 'End':
+          event.preventDefault();
+          scrollTo(games.length - 1);
+          break;
+        case 'Enter': {
+          const active = games[activeIndex];
+          if (active) {
+            event.preventDefault();
+            router.push(`/feed/${active.gameId}`);
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [activeIndex, games, router, scrollTo]);
+
+  // NF_0002: клиент заранее загружает следующие карточки. Каждый prefetch
+  // кладёт карточку в тот же ключ ['game', id], что читает страница игры,
+  // поэтому переход открывается из кэша, без запроса.
   const prefetchedRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     for (const game of games) {
@@ -78,9 +170,14 @@ export default function FeedPage() {
   }, [games, queryClient]);
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold sm:text-2xl">Лента</h1>
+        {games.length > 0 && (
+          <span className="text-xs text-zinc-500" data-feed-position>
+            {activeIndex + 1} / {games.length}
+          </span>
+        )}
         <div className="ml-auto flex gap-1 rounded border border-zinc-800 p-1 text-sm">
           {CATEGORIES.map((item) => (
             <button
@@ -137,29 +234,64 @@ export default function FeedPage() {
         </p>
       )}
 
-      <ul className="space-y-4">
-        {games.map((game) => (
-          <li key={game.gameId}>
-            <Link
-              href={`/feed/${game.gameId}`}
-              className="block rounded border border-zinc-800 p-4 transition-colors hover:border-emerald-600"
+      {games.length > 0 && (
+        <ul
+          ref={railRef}
+          data-feed-rail
+          className="flex max-h-[70dvh] snap-y snap-mandatory flex-col gap-3 overflow-y-auto overscroll-contain scroll-smooth rounded border border-zinc-900 bg-zinc-950/60 p-2 sm:max-h-[72dvh]"
+          aria-label="Лента мини-игр"
+        >
+          {games.map((game, index) => (
+            <li
+              key={game.gameId}
+              ref={(element) => {
+                cardRefs.current[index] = element;
+              }}
+              data-index={index}
+              {...(index === activeIndex ? { 'aria-current': 'true' as const } : {})}
+              className="snap-start snap-always shrink-0"
             >
-              <h2 className="font-medium">{game.title || game.gameId}</h2>
-              {game.description && (
-                <p className="mt-1 text-sm text-zinc-400">{game.description}</p>
-              )}
-              <p className="mt-2 text-xs text-zinc-500">
-                {(game.genreTitles ?? []).join(' · ') || 'без жанров'}
-              </p>
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      <div ref={sentinelRef} className="h-8" />
+              <Link
+                href={`/feed/${game.gameId}`}
+                className={`flex h-[64dvh] min-h-[18rem] flex-col justify-between rounded border p-4 transition-colors sm:p-6 ${
+                  index === activeIndex
+                    ? 'border-emerald-600 bg-zinc-900'
+                    : 'border-zinc-800 bg-zinc-950 hover:border-emerald-600'
+                }`}
+              >
+                <div>
+                  <h2 className="text-lg font-semibold sm:text-2xl">
+                    {game.title || game.gameId}
+                  </h2>
+                  {game.description && (
+                    <p className="mt-2 text-sm text-zinc-400 sm:text-base">
+                      {game.description}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-zinc-500">
+                    {(game.genreTitles ?? []).join(' · ') || 'без жанров'}
+                  </p>
+                  <p className="text-xs text-emerald-500">Открыть и играть →</p>
+                </div>
+              </Link>
+            </li>
+          ))}
+          <li ref={(element) => {
+            sentinelRef.current = element as unknown as HTMLDivElement | null;
+          }} className="h-2 shrink-0" aria-hidden />
+        </ul>
+      )}
 
       {isFetchingNextPage && (
         <p className="text-sm text-zinc-500">Подгружаем ещё…</p>
+      )}
+
+      {games.length > 0 && (
+        <p className="text-xs text-zinc-500">
+          Листайте свайпом или ↑/↓, Enter — открыть игру.
+        </p>
       )}
 
       <form
