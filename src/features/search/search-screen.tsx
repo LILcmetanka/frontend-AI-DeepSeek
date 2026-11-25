@@ -92,8 +92,8 @@ export function SearchScreen() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex flex-none flex-wrap items-center gap-3 border-b border-line px-4 py-3.5 dt:px-10">
-        <label className="relative flex min-w-[220px] flex-1 items-center dt:max-w-[520px]">
+      <header className="flex flex-none flex-col gap-3 border-b border-line px-4 py-3.5 dt:flex-row dt:items-center dt:px-10">
+        <label className="relative flex w-full items-center dt:max-w-[520px] dt:flex-1">
           <span className="sr-only">поиск игр</span>
           <svg
             viewBox="0 0 24 24"
@@ -116,19 +116,21 @@ export function SearchScreen() {
           />
         </label>
 
-        <span className="font-mono text-[12px] text-ink-mute">
-          {catalog.isLoading
-            ? 'считаем игры…'
-            : `${found.length} ${gamesWord(found.length)}`}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-[12px] text-ink-mute">
+            {catalog.isLoading
+              ? 'считаем игры…'
+              : `${found.length} ${gamesWord(found.length)}`}
+          </span>
 
-        <Link
-          href="/create"
-          className="ml-auto inline-flex h-[46px] flex-none items-center gap-2 rounded-pill bg-acid px-5 text-[14px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94]"
-        >
-          <WandIcon className="h-[19px] w-[19px]" />
-          создать игру
-        </Link>
+          <Link
+            href="/create"
+            className="ml-auto inline-flex h-[46px] flex-none items-center gap-2 rounded-pill bg-acid px-5 text-[14px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94] dt:ml-0"
+          >
+            <WandIcon className="h-[19px] w-[19px]" />
+            создать игру
+          </Link>
+        </div>
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-5 pb-24 dt:px-10">
