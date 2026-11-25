@@ -42,7 +42,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isFeed = pathname === '/feed';
   // Профиль сам держит поля и ширину колонки 980 px из макета: sticky-шапка
   // во всю ширину не получится, если отступы добавляет каркас.
-  const isFullWidth = isFeed || pathname === '/profile';
+  // AI Remix сам держит карточку 1060 px из макета 06 — по той же причине.
+  const isFullWidth = isFeed || pathname === '/profile' || pathname === '/create';
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-page text-ink">
