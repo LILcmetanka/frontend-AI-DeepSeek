@@ -38,5 +38,10 @@ jobs:
       - name: Проверки пакета игры
         run: npm run check:package
 
+      # Чистые модули: разбор X-Trace-ID, подпись автора, SRI пакета, итог
+      # сессии. Раннер — сам Node (`node --test`), новых пакетов нет.
+      - name: Тесты чистых модулей
+        run: npm test
+
       - name: Сборка
         run: npm run build
