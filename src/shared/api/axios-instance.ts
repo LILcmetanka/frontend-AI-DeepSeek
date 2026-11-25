@@ -202,6 +202,15 @@ export async function sendEvent(payload: {
 }
 
 /** Текст ошибки для человека: сообщение шлюза, иначе общая фраза. */
+/**
+ * GW_0002 / ADR-0031: в строгом режиме лента и события требуют входа, и
+ * анонимный запрос получает 401. Отличаем этот случай от поломки, чтобы
+ * показать приглашение войти, а не техническую ошибку.
+ */
+export function isUnauthorized(error: unknown): boolean {
+  return axios.isAxiosError(error) && error.response?.status === 401;
+}
+
 export function errorMessage(error: unknown): string {
   if (axios.isAxiosError<ErrorDto>(error)) {
     const detail = error.response?.data?.error?.message;
