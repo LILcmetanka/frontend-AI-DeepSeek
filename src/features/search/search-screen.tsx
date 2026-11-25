@@ -228,7 +228,7 @@ function SearchCard({ game }: { game: GameDto }) {
       href={`/feed/${game.gameId}`}
       className="group relative block aspect-[9/16] overflow-hidden rounded-lg bg-peel-950 shadow-[inset_0_0_0_1px_var(--color-line)] transition-[transform,box-shadow] duration-[var(--dur-base)] hover:-translate-y-1 hover:shadow-[inset_0_0_0_2px_var(--color-lime-300)]"
     >
-      <StageBackdrop gameId={game.gameId} />
+      <StageBackdrop gameId={game.gameId} config={game.config} />
 
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%]"
