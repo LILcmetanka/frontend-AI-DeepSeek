@@ -8,6 +8,7 @@ import {
   drawPreviewFrame,
   gameHash,
   pickPreviewKind,
+  previewImageUrl,
   sceneFor,
   spriteNames,
   type PreviewContext,
@@ -152,4 +153,34 @@ test('drawPreviewFrame: одинаковый вход — одинаковый �
   drawPreviewFrame(right, 200, 300, 4.2, scene);
 
   assert.deepEqual(left.calls, right.calls);
+});
+
+test('previewImageUrl: берёт кадр генерации из конфига', () => {
+  const config = JSON.stringify({
+    preview: { kind: 'runner', url: 'http://localhost:8090/videos/abc/player-base.png' },
+  });
+  assert.equal(
+    previewImageUrl(config),
+    'http://localhost:8090/videos/abc/player-base.png',
+  );
+  const https = JSON.stringify({ preview: { url: ' https://cdn.example.com/videos/x/p-base.png ' } });
+  assert.equal(previewImageUrl(https), 'https://cdn.example.com/videos/x/p-base.png');
+});
+
+test('previewImageUrl: нет кадра — null, а не выдуманный адрес', () => {
+  assert.equal(previewImageUrl(undefined), null);
+  assert.equal(previewImageUrl(null), null);
+  assert.equal(previewImageUrl(''), null);
+  assert.equal(previewImageUrl('{'), null);
+  assert.equal(previewImageUrl('юю'), null);
+  assert.equal(previewImageUrl('[1,2]'), null);
+  // Только вид без кадра: карточка рисует сцену.
+  assert.equal(previewImageUrl(JSON.stringify({ preview: { kind: 'runner' } })), null);
+  assert.equal(previewImageUrl(JSON.stringify({ preview: {} })), null);
+  // Не строка.
+  assert.equal(previewImageUrl(JSON.stringify({ preview: { url: 42 } })), null);
+  // Относительный путь и чужие схемы не принимаем.
+  assert.equal(previewImageUrl(JSON.stringify({ preview: { url: '/videos/x/p.png' } })), null);
+  assert.equal(previewImageUrl(JSON.stringify({ preview: { url: 'javascript:alert(1)' } })), null);
+  assert.equal(previewImageUrl(JSON.stringify({ preview: { url: 'data:image/png;base64,AAA' } })), null);
 });
