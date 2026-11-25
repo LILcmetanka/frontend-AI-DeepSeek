@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { PlayingScreen } from '@/features/game/playing-screen';
 
 export const metadata: Metadata = {
-  title: 'Игра — Hookster',
+  title: 'игра — hookster',
 };
 
 /**

@@ -7,6 +7,7 @@ import { CheckIcon, CloseIcon, HooksterFace, WifiOffIcon } from '@/components/ui
 import { StageBackdrop } from '@/features/game/stage-backdrop';
 import { getFeed, isUnauthorized, type GameDto } from '@/shared/api/axios-instance';
 import { authorHandle } from '@/shared/lib/author';
+import { buttonClass } from '@/components/ui/controls';
 
 /**
  * Выбор исходной игры для ремикса: лист поверх экрана с сеткой из GET /feed.
@@ -44,7 +45,7 @@ export function GamePicker({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[rgba(6,6,3,0.72)] backdrop-blur-[6px] dt:items-center dt:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-overlay backdrop-blur-[6px] dt:items-center dt:p-6"
       role="presentation"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
@@ -59,7 +60,7 @@ export function GamePicker({
         <header className="flex items-center gap-3 border-b border-line px-4 py-3.5 dt:px-6 dt:py-4">
           <h2
             id="game-picker-title"
-            className="min-w-0 flex-1 font-display text-[18px] leading-[1.15] font-extrabold tracking-[-0.03em] text-ink dt:text-[20px]"
+            className="min-w-0 flex-1 font-display text-title-3 leading-title font-extrabold tracking-display text-ink dt:text-title-2"
           >
             выбери исходную игру
           </h2>
@@ -67,7 +68,7 @@ export function GamePicker({
             type="button"
             onClick={onClose}
             aria-label="закрыть"
-            className="grid h-10 w-10 flex-none place-items-center rounded-pill bg-hover text-ink transition-colors duration-150 hover:bg-hover-strong"
+            className="grid h-10 w-10 flex-none place-items-center rounded-pill bg-hover text-ink transition-colors duration-[var(--dur-fast)] hover:bg-hover-strong"
           >
             <CloseIcon className="h-5 w-5" />
           </button>
@@ -93,7 +94,7 @@ export function GamePicker({
             >
               <Link
                 href="/login?next=/create"
-                className="inline-flex h-12 items-center rounded-pill bg-acid px-5 text-[15px] font-extrabold text-peel-900 transition-colors duration-150 hover:bg-acid-hi"
+                className={buttonClass('primary', 'md')}
               >
                 войти
               </Link>
@@ -109,7 +110,7 @@ export function GamePicker({
               <button
                 type="button"
                 onClick={() => void feed.refetch()}
-                className="inline-flex h-12 items-center rounded-pill bg-acid px-5 text-[15px] font-extrabold text-peel-900 transition-colors duration-150 hover:bg-acid-hi"
+                className={buttonClass('primary', 'md')}
               >
                 попробовать снова
               </button>
@@ -125,14 +126,14 @@ export function GamePicker({
               <div className="flex flex-wrap justify-center gap-2.5">
                 <Link
                   href="/feed"
-                  className="inline-flex h-12 items-center rounded-pill bg-acid px-5 text-[15px] font-extrabold text-peel-900 transition-colors duration-150 hover:bg-acid-hi"
+                  className={buttonClass('primary', 'md')}
                 >
                   в ленту
                 </Link>
                 <button
                   type="button"
                   onClick={() => void feed.refetch()}
-                  className="inline-flex h-12 items-center rounded-pill border-2 border-line-strong px-5 text-[14px] font-bold text-ink transition-colors duration-150 hover:border-acid hover:text-acid"
+                  className="inline-flex h-12 items-center rounded-pill border-2 border-line-strong px-5 text-body-sm font-bold text-ink transition-colors duration-[var(--dur-fast)] hover:border-accent-line hover:text-accent"
                 >
                   обновить
                 </button>
@@ -150,8 +151,8 @@ export function GamePicker({
                     type="button"
                     onClick={() => onSelect(game)}
                     aria-pressed={selected}
-                    className={`relative aspect-[9/16] overflow-hidden rounded-md border-2 text-left transition-[border-color,transform] duration-150 hover:-translate-y-0.5 active:scale-[0.97] ${
-                      selected ? 'border-acid' : 'border-line hover:border-line-strong'
+                    className={`relative aspect-[9/16] overflow-hidden rounded-md border-2 text-left transition-[border-color,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 active:scale-[0.97] ${
+                      selected ? 'border-accent-line' : 'border-line hover:border-line-strong'
                     }`}
                   >
                     <StageBackdrop gameId={game.gameId} />
@@ -164,15 +165,15 @@ export function GamePicker({
                       }}
                     />
                     {selected && (
-                      <span className="absolute top-2 right-2 grid h-6 w-6 place-items-center rounded-pill bg-acid text-peel-900">
+                      <span className="absolute top-2 right-2 grid h-6 w-6 place-items-center rounded-pill bg-acid text-on-acid">
                         <CheckIcon className="h-3.5 w-3.5" strokeWidth={3.5} />
                       </span>
                     )}
                     <span className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-2.5">
-                      <span className="scrim-text line-clamp-2 text-[13px] leading-[1.2] font-extrabold text-peel-25">
+                      <span className="scrim-text line-clamp-2 text-caption leading-title font-extrabold text-peel-25">
                         {game.title || 'без названия'}
                       </span>
-                      <span className="truncate font-mono text-[10px] text-peel-300">
+                      <span className="truncate font-mono text-micro text-peel-300">
                         {authorHandle(game.authorId)}
                         {game.genreTitles?.[0] ? ` · ${game.genreTitles[0]}` : ''}
                       </span>
@@ -184,7 +185,7 @@ export function GamePicker({
           )}
 
           {feed.data?.nextCursor && (
-            <p className="mt-4 text-center font-mono text-[11px] text-ink-mute">
+            <p className="mt-4 text-center font-mono text-micro text-ink-mute">
               показаны первые {games.length} игр
             </p>
           )}
@@ -209,17 +210,17 @@ function PickerState({
     <div className="flex flex-col items-center justify-center gap-3.5 px-4 py-10 text-center">
       {icon === 'mascot' ? (
         <span className="grid h-[76px] w-[76px] place-items-center rounded-pill bg-acid">
-          <HooksterFace className="w-[57px] text-peel-900" />
+          <HooksterFace className="w-[57px] text-on-acid" />
         </span>
       ) : (
-        <span className="grid h-[76px] w-[76px] place-items-center rounded-pill bg-[rgba(255,46,147,0.16)]">
-          <WifiOffIcon className="h-[34px] w-[34px] text-hot" />
+        <span className="grid h-[76px] w-[76px] place-items-center rounded-pill bg-danger/15">
+          <WifiOffIcon className="h-[34px] w-[34px] text-danger" />
         </span>
       )}
-      <div className="font-display text-[22px] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink">
+      <div className="font-display text-title-2 leading-title font-extrabold tracking-display text-ink">
         {title}
       </div>
-      <p className="m-0 max-w-[42ch] text-[14px] leading-[1.5] font-medium text-ink-soft">
+      <p className="m-0 max-w-[42ch] text-body-sm leading-body font-medium text-ink-soft">
         {text}
       </p>
       {children && <div className="mt-1.5">{children}</div>}

@@ -290,11 +290,11 @@ export function errorMessage(error: unknown): string {
       return detail;
     }
     if (error.response?.status === 501) {
-      return "Лента пока недоступна: в контракте нет метода выдачи.";
+      return "лента пока недоступна: в контракте нет метода выдачи";
     }
-    return `Ошибка запроса (${error.response?.status ?? "сеть"})`;
+    return `ошибка запроса (${error.response?.status ?? "сеть"})`;
   }
-  return "Неизвестная ошибка";
+  return "неизвестная ошибка";
 }
 
 /**
@@ -308,11 +308,11 @@ export function taskStateLabel(
     case "PENDING":
       return "В очереди";
     case "PROCESSING":
-      return "Генерируется";
+      return "генерируется";
     case "SUCCESS":
-      return "Готово";
+      return "готово";
     case "ERROR":
-      return "Ошибка";
+      return "ошибка";
     default:
       return "…";
   }
@@ -329,29 +329,29 @@ export function taskErrorMessage(
 ): string {
   switch (code) {
     case "INVALID_INPUT":
-      return "Запрос не прошёл проверку. Проверьте сообщение и игру.";
+      return "запрос не прошёл проверку. проверь сообщение и игру";
     case "MODERATION_REJECTED":
-      return "Сообщение отклонено модерацией. Перефразируйте запрос.";
+      return "сообщение отклонено модерацией. переформулируй запрос";
     case "IDEMPOTENCY_CONFLICT":
-      return "Этот запрос уже отправлялся с другим содержимым. Поменяйте запрос.";
+      return "этот запрос уже отправлялся с другим содержимым. поменяй запрос";
     case "TEMPLATE_NOT_FOUND":
-      return "Шаблон игры не найден.";
+      return "шаблон игры не найден";
     case "INVALID_MANIFEST":
-      return "Шаблон игры повреждён: ИИ вернул неверную структуру.";
+      return "шаблон игры повреждён: ИИ вернул неверную структуру";
     case "AI_REFUSED":
-      return "ИИ отказался менять игру. Попробуйте переформулировать.";
+      return "ИИ отказался менять игру. попробуй переформулировать";
     case "CONFIG_SERVICE_FAILED":
     case "ASSET_SERVICE_FAILED":
     case "ASSET_GENERATOR_FAILED":
-      return "Сервис генерации не справился. Попробуйте ещё раз.";
+      return "сервис генерации не справился. попробуй ещё раз";
     case "SAVE_GAME_FAILED":
-      return "Игра сгенерирована, но не сохранилась в ленте. Мы уже разбираемся.";
+      return "игра сгенерирована, но не сохранилась в ленте. уже разбираемся";
     case "TIMEOUT":
-      return "Генерация заняла слишком много времени. Попробуйте ещё раз.";
+      return "генерация заняла слишком много времени. попробуй ещё раз";
     case "INTERNAL":
-      return "Внутренняя ошибка генерации. Попробуйте позже.";
+      return "внутренняя ошибка генерации. попробуй позже";
     default:
       // Кода нет — показываем общую фразу и код, если он есть.
-      return message ? `Ошибка генерации (${message})` : "Ошибка генерации.";
+      return message ? `ошибка генерации (${message})` : "ошибка генерации";
   }
 }

@@ -11,6 +11,7 @@ import {
   readSessionResult,
   type SessionResult,
 } from '@/shared/lib/session-result';
+import { buttonClass } from '@/components/ui/controls';
 
 /**
  * Экран итога сессии — макет «03 Session Result».
@@ -91,22 +92,22 @@ export function SessionResultScreen({ gameId }: { gameId: string }) {
         <div className="feed-frame">
           <div className="absolute inset-0 grid place-items-center px-8 text-center">
             <div className="flex max-w-[320px] flex-col items-center">
-              <p className="text-[17px] leading-[1.35] font-bold text-peel-25">
+              <p className="text-title-3 leading-body font-bold text-peel-25">
                 Итога сессии нет
               </p>
-              <p className="mt-2 text-[14px] leading-[1.5] text-ink-soft">
+              <p className="mt-2 text-body-sm leading-body text-ink-soft">
                 Сыграйте игру — после выхода здесь будет время сессии.
               </p>
               <div className="mt-4 flex items-center gap-2">
                 <Link
                   href={`/feed/${gameId}`}
-                  className="rounded-pill bg-acid px-5 py-2.5 text-[14px] font-extrabold text-peel-900 transition-colors hover:bg-acid-hi"
+                  className={buttonClass('primary', 'md')}
                 >
                   играть
                 </Link>
                 <Link
                   href="/feed"
-                  className="rounded-pill border-2 border-line-strong px-5 py-2.5 text-[14px] font-bold text-peel-25 transition-colors hover:border-acid hover:text-acid"
+                  className="rounded-pill border-2 border-line-strong px-5 py-2.5 text-body-sm font-bold text-peel-25 transition-colors hover:border-accent-line hover:text-accent"
                 >
                   к ленте
                 </Link>
@@ -128,31 +129,31 @@ export function SessionResultScreen({ gameId }: { gameId: string }) {
         <div className="absolute inset-0 opacity-50 blur-[3px]">
           <StageBackdrop gameId={own.gameId} />
         </div>
-        <div className="absolute inset-0 bg-[rgba(6,6,3,0.74)]" />
+        <div className="absolute inset-0 bg-overlay" />
 
         <div className="absolute inset-0 flex flex-col justify-center gap-6 overflow-y-auto p-7 max-dt:pb-24">
           <div className="flex flex-col items-center gap-2 text-center">
-            <span className="font-mono text-[11px] font-bold tracking-[0.14em] text-peel-300 uppercase">
+            <span className="font-mono text-micro font-bold tracking-caps text-peel-300 uppercase">
               {hasScore ? 'очки за сессию' : 'время сессии'}
             </span>
             <div
               data-session-result
-              className="font-display text-[64px] leading-none font-black tracking-[-0.04em] tabular-nums text-lime-300"
+              className="font-display text-display-1 leading-none font-black tracking-display tabular-nums text-lime-300"
             >
               {big}
             </div>
-            <div className="text-[15px] font-semibold text-peel-100">
+            <div className="text-body font-semibold text-peel-100">
               {own.title || 'Игра'}
             </div>
           </div>
 
           {hasScore && (
-            <div className="grid grid-cols-1 overflow-hidden rounded-lg bg-[rgba(242,242,232,0.14)]">
-              <div className="flex flex-col items-center gap-1 bg-[rgba(6,6,3,0.72)] px-1.5 py-[15px]">
-                <div className="font-mono text-[18px] font-bold text-peel-25">
+            <div className="grid grid-cols-1 overflow-hidden rounded-lg bg-hover-strong">
+              <div className="flex flex-col items-center gap-1 bg-overlay px-1.5 py-[15px]">
+                <div className="font-mono text-title-3 font-bold text-peel-25">
                   {formatDuration(own.durationSec)}
                 </div>
-                <div className="font-mono text-[10px] tracking-[0.1em] text-peel-300 uppercase">
+                <div className="font-mono text-micro tracking-caps text-peel-300 uppercase">
                   время
                 </div>
               </div>
@@ -162,7 +163,7 @@ export function SessionResultScreen({ gameId }: { gameId: string }) {
           <div className="flex flex-col gap-2.5">
             <Link
               href={`/create?gameId=${own.gameId}`}
-              className="flex h-14 items-center justify-center gap-[9px] rounded-pill bg-acid text-[16px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94]"
+              className="flex h-14 items-center justify-center gap-[9px] rounded-pill bg-acid text-body font-extrabold text-on-acid transition-[background,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94]"
             >
               <WandIcon className="h-5 w-5" />
               сделать свою версию
@@ -171,14 +172,14 @@ export function SessionResultScreen({ gameId }: { gameId: string }) {
             <div className="flex gap-2.5">
               <Link
                 href={`/feed/${own.gameId}`}
-                className="flex h-[50px] flex-1 items-center justify-center gap-2 rounded-pill border-2 border-[rgba(242,242,232,0.4)] text-[15px] font-bold text-peel-25 transition-colors duration-150 hover:border-lime-300 hover:text-lime-300 active:scale-[0.94]"
+                className="flex h-[50px] flex-1 items-center justify-center gap-2 rounded-pill border-2 border-line-strong text-body font-bold text-peel-25 transition-colors duration-[var(--dur-fast)] hover:border-lime-300 hover:text-lime-300 active:scale-[0.94]"
               >
                 <RotateIcon className="h-[18px] w-[18px]" />
                 ещё раз
               </Link>
               <Link
                 href={nextHref}
-                className="flex h-[50px] flex-1 items-center justify-center gap-2 rounded-pill border-2 border-[rgba(242,242,232,0.4)] text-[15px] font-bold text-peel-25 transition-colors duration-150 hover:border-lime-300 hover:text-lime-300 active:scale-[0.94]"
+                className="flex h-[50px] flex-1 items-center justify-center gap-2 rounded-pill border-2 border-line-strong text-body font-bold text-peel-25 transition-colors duration-[var(--dur-fast)] hover:border-lime-300 hover:text-lime-300 active:scale-[0.94]"
               >
                 дальше
                 <ChevronDownIcon className="h-[18px] w-[18px]" />
@@ -188,7 +189,7 @@ export function SessionResultScreen({ gameId }: { gameId: string }) {
             <button
               type="button"
               onClick={() => void share()}
-              className="p-1.5 font-mono text-[12px] text-peel-300 transition-colors duration-150 hover:text-peel-25"
+              className="p-1.5 font-mono text-caption text-peel-300 transition-colors duration-[var(--dur-fast)] hover:text-peel-25"
             >
               поделиться результатом
             </button>
@@ -196,7 +197,7 @@ export function SessionResultScreen({ gameId }: { gameId: string }) {
         </div>
 
         {toast && (
-          <div className="animate-toast absolute top-[74px] left-1/2 z-40 -translate-x-1/2 rounded-pill bg-peel-25 px-4 py-2.5 text-[13px] font-bold whitespace-nowrap text-peel-900 shadow-pop">
+          <div className="animate-toast absolute top-[74px] left-1/2 z-40 -translate-x-1/2 rounded-pill bg-inverse px-4 py-2.5 text-caption font-bold whitespace-nowrap text-on-inverse shadow-pop">
             {toast}
           </div>
         )}

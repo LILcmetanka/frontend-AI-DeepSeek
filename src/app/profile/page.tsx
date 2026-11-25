@@ -3,7 +3,7 @@ import { ProfileScreen } from '@/features/profile/profile-screen';
 import { RequireAuth } from '@/shared/lib/require-auth';
 
 export const metadata: Metadata = {
-  title: 'Профиль — Hookster',
+  title: 'профиль — hookster',
 };
 
 /** Экран профиля по макету: шапка, статистика, вкладки и сетка игр. */

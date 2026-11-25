@@ -450,8 +450,8 @@ export function GamePlayer({
   // NF_0010: несовместимый шаблон — понятный отказ вместо пустого iframe.
   if (!compatible) {
     return (
-      <div className="rounded border border-amber-700 bg-amber-950/40 p-4 text-sm text-amber-200">
-        Игра собрана для более нового движка ({engineMinVersion}), а у нас{' '}
+      <div className="rounded border border-warning bg-warning/10 p-4 text-sm text-warning">
+        игра собрана для более нового движка ({engineMinVersion}), а у нас{' '}
         {engineVersion}. Обновите страницу позже — мы обновляем движок.
       </div>
     );
@@ -468,7 +468,7 @@ export function GamePlayer({
   // Экран игры: игра занимает весь кадр, оверлеи лежат поверх.
   const shellClass = fill
     ? 'absolute inset-0 z-0 overflow-hidden bg-peel-950'
-    : 'relative w-full overflow-hidden rounded border border-zinc-800 bg-black';
+    : 'relative w-full overflow-hidden rounded border border-line bg-black';
   const frameClass = fill
     ? 'h-full w-full'
     : 'h-[60vh] min-h-[320px] w-full sm:h-[70vh] sm:min-h-[420px]';
@@ -486,7 +486,7 @@ export function GamePlayer({
           // allow-same-origin — у пакета opaque origin, к платформе доступа нет.
           srcDoc={packageDoc}
           sandbox="allow-scripts"
-          title="Игра"
+          title="игра"
           className={frameClass}
         />
       ) : packageStatus === 'loading' ? (
@@ -497,7 +497,7 @@ export function GamePlayer({
         <iframe
           ref={frameRef}
           src={`${gameUrl}?embed=1&gameId=${encodeURIComponent(gameId)}&userId=${encodeURIComponent(userId)}`}
-          title="Игра"
+          title="игра"
           className={frameClass}
           onLoad={() => {
             // Страховка, если ready пришёл раньше, чем мы повесили обработчик.
@@ -506,8 +506,8 @@ export function GamePlayer({
         />
       )}
       {!ready && (
-        <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-zinc-400">
-          Загружаем игру…
+        <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-ink-soft">
+          собираю игру…
         </p>
       )}
     </div>

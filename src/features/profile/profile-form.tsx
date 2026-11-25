@@ -12,6 +12,7 @@ import {
   type ProfileDto,
   type UpdateProfilePayload,
 } from '@/shared/api/axios-instance';
+import { Button, Field, Input, Message, buttonClass } from '@/components/ui/controls';
 
 /**
  * DT_0005: редактор профиля поверх экрана — по макету «Профиль» кнопка
@@ -131,7 +132,7 @@ export function ProfileEditSheet({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-[rgba(6,6,3,0.72)] p-0 backdrop-blur-[6px] dt:items-center dt:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-overlay p-0 backdrop-blur-[6px] dt:items-center dt:p-6"
       role="presentation"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
@@ -146,7 +147,7 @@ export function ProfileEditSheet({
         <div className="mb-5 flex items-center gap-3">
           <h2
             id="profile-edit-title"
-            className="min-w-0 flex-1 font-display text-[18px] leading-[1.15] font-extrabold tracking-[-0.03em] text-ink dt:text-[20px]"
+            className="min-w-0 flex-1 font-display text-title-3 leading-title font-extrabold tracking-display text-ink dt:text-title-2"
           >
             редактировать профиль
           </h2>
@@ -154,7 +155,7 @@ export function ProfileEditSheet({
             type="button"
             onClick={onClose}
             aria-label="закрыть"
-            className="grid h-10 w-10 flex-none place-items-center rounded-pill bg-hover text-ink transition-colors duration-150 hover:bg-hover-strong"
+            className="grid h-10 w-10 flex-none place-items-center rounded-pill bg-hover text-ink transition-colors duration-[var(--dur-fast)] hover:bg-hover-strong"
           >
             <CloseIcon className="h-5 w-5" />
           </button>
@@ -166,12 +167,12 @@ export function ProfileEditSheet({
             hint="латиница, цифры и «_», 1–255 символов"
             error={errors.username?.message}
           >
-            <input
+            <Input
+              invalid={errors.username?.message !== undefined}
               {...register('username')}
               autoComplete="username"
               autoFocus
               placeholder="nona"
-              className={inputClass(errors.username?.message !== undefined)}
             />
           </Field>
 
@@ -180,20 +181,20 @@ export function ProfileEditSheet({
             hint="как подписывать игры, до 255 символов"
             error={errors.name?.message}
           >
-            <input
+            <Input
+              invalid={errors.name?.message !== undefined}
               {...register('name')}
               autoComplete="name"
               placeholder="нона"
-              className={inputClass(errors.name?.message !== undefined)}
             />
           </Field>
 
           <Field label="дата рождения" error={errors.birth_date?.message}>
-            <input
+            <Input
+              invalid={errors.birth_date?.message !== undefined}
               {...register('birth_date')}
               type="date"
               max={todayIso()}
-              className={inputClass(errors.birth_date?.message !== undefined)}
             />
           </Field>
 
@@ -202,38 +203,30 @@ export function ProfileEditSheet({
             hint="ссылка на картинку, до 255 символов"
             error={errors.avatar_url?.message}
           >
-            <input
+            <Input
+              invalid={errors.avatar_url?.message !== undefined}
               {...register('avatar_url')}
               inputMode="url"
               placeholder="http://localhost:9000/hookster/avatars/user.png"
-              className={inputClass(errors.avatar_url?.message !== undefined)}
             />
           </Field>
 
           {notice && (
-            <p className="rounded-md border border-line bg-hover px-3 py-2.5 text-[13px] font-semibold text-ink-soft">
+            <p className="rounded-md border border-line bg-hover px-3 py-2.5 text-caption font-semibold text-ink-soft">
               {notice}
             </p>
           )}
 
-          {save.isError && (
-            <p className="rounded-md border border-hot/40 bg-[rgba(255,46,147,0.12)] px-3 py-2.5 text-[13px] font-semibold text-hot-200">
-              {errorMessage(save.error)}
-            </p>
-          )}
+          {save.isError && <Message tone="error">{errorMessage(save.error)}</Message>}
 
           <div className="flex flex-wrap gap-2.5 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-12 flex-[0_1_auto] rounded-pill border-2 border-line-strong px-5 text-[15px] font-bold text-ink transition-colors duration-150 hover:border-acid hover:text-acid"
-            >
+            <Button type="button" variant="outline" size="lg" onClick={onClose}>
               отмена
-            </button>
+            </Button>
             <button
               type="submit"
               disabled={isSubmitting || save.isPending}
-              className="h-12 flex-[1_1_auto] rounded-pill bg-acid px-6 text-[15px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.97] disabled:pointer-events-none disabled:opacity-60"
+              className={buttonClass('primary', 'lg', 'flex-[1_1_auto]')}
             >
               {save.isPending ? 'сохраняем…' : 'сохранить'}
             </button>
@@ -244,45 +237,11 @@ export function ProfileEditSheet({
   );
 }
 
-function inputClass(invalid: boolean): string {
-  return [
-    'h-12 w-full rounded-md border bg-peel-700 px-3.5 text-[15px] text-ink placeholder:text-ink-mute',
-    'transition-colors duration-150 outline-none focus:border-acid',
-    invalid ? 'border-hot' : 'border-line',
-  ].join(' ');
-}
-
-function Field({
-  label,
-  hint,
-  error,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="font-mono text-[10px] font-bold tracking-[0.1em] text-ink-mute uppercase">
-        {label}
-      </span>
-      {children}
-      {error ? (
-        <span className="text-[12px] font-semibold text-hot-200">{error}</span>
-      ) : (
-        hint && <span className="text-[12px] text-ink-mute">{hint}</span>
-      )}
-    </label>
-  );
-}
-
 /** Тост после сохранения: на экране профиля, без перезагрузки. */
 export function ProfileSavedToast({ message }: { message: string }) {
   return (
     <div
-      className="toast-drop fixed top-[78px] left-1/2 z-[60] flex items-center gap-2 rounded-pill bg-peel-25 px-4 py-2.5 text-[13px] font-bold whitespace-nowrap text-peel-900 shadow-pop"
+      className="toast-drop fixed top-[78px] left-1/2 z-[60] flex items-center gap-2 rounded-pill bg-inverse px-4 py-2.5 text-caption font-bold whitespace-nowrap text-on-inverse shadow-pop"
       style={{ transform: 'translateX(-50%)' }}
     >
       <CheckIcon className="h-4 w-4 text-lime-600" />

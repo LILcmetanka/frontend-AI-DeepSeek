@@ -25,6 +25,7 @@ import { useGameLikes } from '@/shared/lib/use-game-likes';
 import { useOnline } from '@/shared/lib/use-online';
 import { ConnectionLost } from '@/components/ui/connection-lost';
 import { TraceIdNote } from '@/components/ui/trace-id-note';
+import { buttonClass } from '@/components/ui/controls';
 
 /**
  * Экран игры — макет «02 Playing»: игра забрала экран, интерфейс ужат до HUD.
@@ -196,17 +197,17 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
           <Link
             href={`/feed/${gameId}/result`}
             aria-label="выход: итог сессии"
-            className="grid h-10 w-10 flex-none place-items-center rounded-pill bg-[rgba(6,6,3,0.55)] text-peel-25 backdrop-blur-[12px] transition-[background,transform] duration-150 hover:bg-[rgba(6,6,3,0.78)] active:scale-[0.94]"
+            className="grid h-10 w-10 flex-none place-items-center rounded-pill bg-overlay text-peel-25 backdrop-blur-[12px] transition-[background,transform] duration-[var(--dur-fast)] hover:bg-overlay active:scale-[0.94]"
           >
             <ArrowLeftIcon className="h-[19px] w-[19px]" />
           </Link>
 
           <div className="min-w-0 flex-1">
-            <p className="scrim-text truncate font-display text-[15px] leading-[1.15] font-extrabold tracking-[-0.02em] text-peel-25">
+            <p className="scrim-text truncate font-display text-body leading-title font-extrabold tracking-title text-peel-25">
               {title}
             </p>
             {author && (
-              <p className="scrim-text truncate font-mono text-[11px] text-peel-300">
+              <p className="scrim-text truncate font-mono text-micro text-peel-300">
                 {author}
               </p>
             )}
@@ -217,12 +218,12 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
             лимита сессии нет ни в конфиге игры, ни в API.
           */}
           <div className="flex flex-none items-center gap-2">
-            <span className="scrim-text font-mono text-[10px] font-bold tracking-[0.12em] text-peel-300 uppercase">
+            <span className="scrim-text font-mono text-micro font-bold tracking-caps text-peel-300 uppercase">
               сессия
             </span>
             <span
               data-session-timer
-              className="scrim-text font-mono text-[18px] leading-none font-bold tabular-nums text-lime-300"
+              className="scrim-text font-mono text-title-3 leading-none font-bold tabular-nums text-lime-300"
             >
               {formatDuration(elapsedSec)}
             </span>
@@ -243,26 +244,26 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
             <div className="flex min-w-0 flex-1 flex-col gap-[9px]">
               <div className="flex min-w-0 items-center gap-[9px]">
                 <span className="grid h-[34px] w-[34px] flex-none place-items-center overflow-hidden rounded-pill bg-acid">
-                  <HooksterFace className="w-[25px] text-peel-900" />
+                  <HooksterFace className="w-[25px] text-on-acid" />
                 </span>
-                <span className="scrim-text min-w-0 flex-[0_1_auto] truncate text-[15px] font-extrabold text-peel-25">
+                <span className="scrim-text min-w-0 flex-[0_1_auto] truncate text-body font-extrabold text-peel-25">
                   {author}
                 </span>
               </div>
 
-              <h1 className="scrim-title line-clamp-2 font-display text-[22px] leading-[1.06] font-extrabold tracking-[-0.03em] text-peel-25 sm:text-[23px]">
+              <h1 className="scrim-title line-clamp-2 font-display text-title-2 leading-title font-extrabold tracking-display text-peel-25 sm:text-title-2">
                 {title}
               </h1>
 
               {data.description && (
-                <p className="scrim-text line-clamp-1 text-[14px] leading-[1.45] font-medium text-peel-100">
+                <p className="scrim-text line-clamp-1 text-body-sm leading-body font-medium text-peel-100">
                   {data.description}
                 </p>
               )}
 
               {genre && (
                 <div className="flex flex-wrap gap-1.5 pt-px">
-                  <span className="rounded-pill bg-[rgba(242,242,232,0.14)] px-2.5 py-[5px] font-mono text-[11px] text-peel-25 backdrop-blur-[8px]">
+                  <span className="rounded-pill bg-hover-strong px-2.5 py-[5px] font-mono text-micro text-peel-25 backdrop-blur-[8px]">
                     {genre}
                   </span>
                 </div>
@@ -278,7 +279,7 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
             />
           </div>
         ) : game.isError && isNetworkError(game.error) ? (
-          <div className="absolute inset-0 z-20 bg-peel-950/70">
+          <div className="absolute inset-0 z-20 bg-sunken/70">
             <ConnectionLost
               onRetry={() => void game.refetch()}
               message="игра не загрузилась: сервер не ответил. если открывали её раньше, повтор возьмёт сохранённую копию"
@@ -288,13 +289,13 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
           <div className="absolute inset-0 z-20 grid place-items-center px-8 text-center">
             <div className="flex max-w-[320px] flex-col items-center">
               {game.isLoading && (
-                <p className="text-[17px] leading-[1.35] font-bold text-peel-25">
+                <p className="text-title-3 leading-body font-bold text-peel-25">
                   Загружаем игру…
                 </p>
               )}
               {!game.isLoading && (
                 <>
-                  <p className="text-[17px] leading-[1.35] font-bold text-peel-25">
+                  <p className="text-title-3 leading-body font-bold text-peel-25">
                     {isUnauthorized(game.error)
                       ? 'Эта игра доступна после входа'
                       : errorMessage(game.error)}
@@ -306,14 +307,14 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
                     {isUnauthorized(game.error) && (
                       <Link
                         href={`/login?next=${encodeURIComponent(`/feed/${gameId}`)}`}
-                        className="rounded-pill bg-acid px-5 py-2.5 text-[14px] font-extrabold text-peel-900 transition-colors hover:bg-acid-hi"
+                        className={buttonClass('primary', 'md')}
                       >
                         войти
                       </Link>
                     )}
                     <Link
                       href="/feed"
-                      className="rounded-pill border-2 border-line-strong px-5 py-2.5 text-[14px] font-bold text-peel-25 transition-colors hover:border-acid hover:text-acid"
+                      className="rounded-pill border-2 border-line-strong px-5 py-2.5 text-body-sm font-bold text-peel-25 transition-colors hover:border-accent-line hover:text-accent"
                     >
                       к ленте
                     </Link>
@@ -326,7 +327,7 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
 
         {data && !GAME_URL && (
           <div className="absolute inset-0 z-20 grid place-items-center px-8">
-            <div className="max-w-[320px] rounded-lg border border-banana-500/60 bg-[rgba(23,23,15,0.92)] p-4 text-[13px] leading-[1.5] text-banana-200">
+            <div className="max-w-[320px] rounded-lg border border-warning/60 bg-card/95 p-4 text-caption leading-body text-warning">
               Плеер не настроен: не задан <code>NEXT_PUBLIC_GAME_URL</code>.
               Игра не запускается, но карточка и метаданные на месте.
             </div>
@@ -336,14 +337,14 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
         {!online && data && (
           <div
             data-offline-banner
-            className="absolute top-[68px] left-1/2 z-40 -translate-x-1/2 rounded-pill bg-peel-25 px-4 py-2 font-mono text-[11px] font-bold whitespace-nowrap text-peel-900 shadow-pop"
+            className="absolute top-[68px] left-1/2 z-40 -translate-x-1/2 rounded-pill bg-inverse px-4 py-2 font-mono text-micro font-bold whitespace-nowrap text-on-inverse shadow-pop"
           >
             офлайн — сохранённая копия
           </div>
         )}
 
         {toast && (
-          <div className="animate-toast absolute top-[74px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-pill bg-peel-25 px-4 py-2.5 text-[13px] font-bold whitespace-nowrap text-peel-900 shadow-pop">
+          <div className="animate-toast absolute top-[74px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-pill bg-inverse px-4 py-2.5 text-caption font-bold whitespace-nowrap text-on-inverse shadow-pop">
             <CheckIcon className="h-4 w-4 text-lime-600" />
             {toast}
           </div>

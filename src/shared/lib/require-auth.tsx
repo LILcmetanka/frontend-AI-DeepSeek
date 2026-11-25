@@ -35,7 +35,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   }, [router, pathname]);
 
   if (!ready) {
-    return <p className="text-zinc-400">Проверяем вход…</p>;
+    return <p className="text-ink-soft">проверяю вход…</p>;
   }
 
   return <>{children}</>;

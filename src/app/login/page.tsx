@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { LoginScreen } from '@/features/auth/login-screen';
 
 export const metadata: Metadata = {
-  title: 'Вход — Hookster',
+  title: 'вход — hookster',
 };
 
 /** Вход по коду: контакт → шесть цифр. `?next=` — куда вернуться после входа. */

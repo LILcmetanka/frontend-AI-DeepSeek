@@ -2,6 +2,7 @@
 
 import { PlayIcon, RotateIcon, WifiOffIcon } from '@/components/ui/icons';
 import type { OfflineGameEntry } from '@/shared/lib/offline-games';
+import { buttonClass } from '@/components/ui/controls';
 
 /**
  * «Связь пропала» по макету 08. Один экран на ленту, профиль и карточку
@@ -33,17 +34,17 @@ export function ConnectionLost({
       className="grid h-full min-h-[60dvh] place-items-center px-6 text-center"
     >
       <div className="flex max-w-[360px] flex-col items-center gap-[18px]">
-        <span className="grid h-[76px] w-[76px] place-items-center rounded-pill bg-hot/15">
-          <WifiOffIcon className="h-[34px] w-[34px] text-hot-300" />
+        <span className="grid h-[76px] w-[76px] place-items-center rounded-pill bg-danger/15">
+          <WifiOffIcon className="h-[34px] w-[34px] text-danger" />
         </span>
-        <p className="font-display text-[24px] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink">
+        <p className="font-display text-title-1 leading-title font-extrabold tracking-display text-ink">
           связь пропала
         </p>
-        <p className="text-[14px] leading-[1.5] font-medium text-ink-soft">
+        <p className="text-body-sm leading-body font-medium text-ink-soft">
           {message ??
             (count > 0
               ? `${count} ${pluralGames(count)} ${count === 1 ? 'сохранена' : 'сохранены'} офлайн — можно играть, пока сеть не вернётся`
-              : 'проверьте подключение и попробуйте снова')}
+              : 'проверь подключение и попробуй снова')}
         </p>
 
         <div className="flex w-full flex-col gap-2.5">
@@ -51,7 +52,7 @@ export function ConnectionLost({
             <button
               type="button"
               onClick={() => onPlayOffline(first)}
-              className="inline-flex h-[50px] items-center justify-center gap-2 rounded-pill bg-acid px-5 text-[15px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94]"
+              className={buttonClass('primary', 'lg')}
             >
               <PlayIcon className="h-[19px] w-[19px]" />
               играть офлайн
@@ -60,7 +61,7 @@ export function ConnectionLost({
           <button
             type="button"
             onClick={onRetry}
-            className="inline-flex h-[46px] items-center justify-center gap-2 rounded-pill border-2 border-line-strong px-5 text-[14px] font-bold text-ink transition-colors duration-150 hover:border-acid hover:text-acid"
+            className="inline-flex h-[46px] items-center justify-center gap-2 rounded-pill border-2 border-line-strong px-5 text-body-sm font-bold text-ink transition-colors duration-[var(--dur-fast)] hover:border-accent-line hover:text-accent"
           >
             <RotateIcon className="h-[17px] w-[17px]" />
             попробовать снова
@@ -69,7 +70,7 @@ export function ConnectionLost({
             <button
               type="button"
               onClick={() => onPlayOffline(second)}
-              className="truncate rounded-pill px-4 py-1.5 font-mono text-[12px] text-ink-mute transition-colors duration-150 hover:text-ink"
+              className="truncate rounded-pill px-4 py-1.5 font-mono text-caption text-ink-mute transition-colors duration-[var(--dur-fast)] hover:text-ink"
             >
               ещё офлайн: {second.game.title}
             </button>

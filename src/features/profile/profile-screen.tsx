@@ -10,6 +10,7 @@ import {
   SettingsIcon,
 } from '@/components/ui/icons';
 import { ProfileGameTile } from '@/features/profile/profile-game-tile';
+import { Mascot } from '@/components/brand/brand';
 import { ProfileEditSheet, ProfileSavedToast } from '@/features/profile/profile-form';
 import { ConnectionLost } from '@/components/ui/connection-lost';
 import { TraceIdNote } from '@/components/ui/trace-id-note';
@@ -24,6 +25,7 @@ import {
   type GameDto,
   type ProfileDto,
 } from '@/shared/api/axios-instance';
+import { buttonClass } from '@/components/ui/controls';
 
 /**
  * Экран профиля по макету «Профиль»: шапка с аватаром и ником, статистика,
@@ -121,7 +123,7 @@ export function ProfileScreen() {
         <button
           type="button"
           onClick={() => void me.refetch()}
-          className="mt-4 inline-flex h-12 items-center rounded-pill border-2 border-line-strong px-5 text-[14px] font-bold text-ink transition-colors duration-150 hover:border-acid hover:text-acid"
+          className="mt-4 inline-flex h-12 items-center rounded-pill border-2 border-line-strong px-5 text-body-sm font-bold text-ink transition-colors duration-[var(--dur-fast)] hover:border-accent-line hover:text-accent"
         >
           повторить
         </button>
@@ -143,16 +145,16 @@ export function ProfileScreen() {
         <Link
           href="/feed"
           aria-label="назад в ленту"
-          className="grid h-11 w-11 flex-none place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-hover-strong active:scale-[0.94]"
+          className="grid h-11 w-11 flex-none place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-hover-strong active:scale-[0.94]"
         >
           <ArrowLeftIcon className="h-[22px] w-[22px]" />
         </Link>
 
         <div className="flex min-w-0 flex-1 flex-col gap-px">
-          <div className="truncate text-[15px] font-extrabold text-ink">
+          <div className="truncate text-body font-extrabold text-ink">
             {handle}
           </div>
-          <div className="truncate font-mono text-[11px] text-ink-mute">
+          <div className="truncate font-mono text-micro text-ink-mute">
             {mineCount === null
               ? '…'
               : mineCount === 0
@@ -166,7 +168,7 @@ export function ProfileScreen() {
           onClick={() => setEditing(true)}
           aria-label="редактировать профиль"
           title="редактировать профиль"
-          className="grid h-11 w-11 flex-none place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-hover-strong active:scale-[0.94]"
+          className="grid h-11 w-11 flex-none place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-hover-strong active:scale-[0.94]"
         >
           <SettingsIcon className="h-[22px] w-[22px]" />
         </button>
@@ -177,10 +179,10 @@ export function ProfileScreen() {
           <Avatar profile={profile} />
 
           <div className="flex min-w-0 flex-1 flex-col gap-1.5 pt-1">
-            <h1 className="m-0 font-display text-[28px] leading-[1.05] font-black tracking-[-0.035em] text-ink">
+            <h1 className="m-0 font-display text-title-1 leading-title font-black tracking-display text-ink">
               {displayName}
             </h1>
-            <div className="font-mono text-[13px] text-ink-soft">{handle}</div>
+            <div className="font-mono text-caption text-ink-soft">{handle}</div>
           </div>
         </div>
 
@@ -193,7 +195,7 @@ export function ProfileScreen() {
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="inline-flex h-[50px] min-w-0 flex-[0_1_320px] items-center justify-center gap-2 rounded-pill bg-acid px-5 text-[15px] font-extrabold whitespace-nowrap text-peel-900 transition-[background,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi hover:shadow-[0_0_24px_rgba(198,255,46,0.45)] active:scale-[0.94]"
+            className={buttonClass('primary', 'lg', 'min-w-0 flex-[0_1_320px]')}
           >
             <PencilIcon className="h-[19px] w-[19px]" />
             редактировать профиль
@@ -305,7 +307,7 @@ export function ProfileScreen() {
 
 function Avatar({ profile }: { profile: ProfileDto }) {
   return (
-    <span className="grid h-[88px] w-[88px] flex-none place-items-center overflow-hidden rounded-pill bg-acid shadow-[0_0_24px_rgba(198,255,46,0.45)]">
+    <span className="grid h-[88px] w-[88px] flex-none place-items-center overflow-hidden rounded-pill bg-acid shadow-glow">
       {profile.avatar_url ? (
         // Ссылка приходит из профиля, домены заранее неизвестны — next/image
         // тут не поможет без настройки remotePatterns.
@@ -316,7 +318,7 @@ function Avatar({ profile }: { profile: ProfileDto }) {
           className="h-full w-full object-cover"
         />
       ) : (
-        <HooksterFace className="w-[66px] text-peel-900" />
+        <HooksterFace className="w-[66px] text-on-acid" />
       )}
     </span>
   );
@@ -325,10 +327,10 @@ function Avatar({ profile }: { profile: ProfileDto }) {
 function StatCell({ value, label }: { value: string; label: string }) {
   return (
     <div className="flex flex-col items-center gap-1 bg-raised px-1.5 py-3.5">
-      <div className="font-mono text-[19px] font-bold text-ink tabular-nums">
+      <div className="font-mono text-title-3 font-bold text-ink tabular-nums">
         {value}
       </div>
-      <div className="text-center font-mono text-[10px] font-bold tracking-[0.1em] text-ink-mute uppercase">
+      <div className="text-center font-mono text-micro font-bold tracking-caps text-ink-mute uppercase">
         {label}
       </div>
     </div>
@@ -356,17 +358,17 @@ function TabButton({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`-mb-px inline-flex shrink-0 items-center gap-[7px] border-b-[3px] bg-transparent pt-2 pb-[11px] text-[15px] whitespace-nowrap transition-colors duration-150 ${
+      className={`-mb-px inline-flex shrink-0 items-center gap-[7px] border-b-[3px] bg-transparent pt-2 pb-[11px] text-body whitespace-nowrap transition-colors duration-[var(--dur-fast)] ${
         active
-          ? 'border-acid font-extrabold text-ink'
+          ? 'border-accent-line font-extrabold text-ink'
           : 'border-transparent font-bold text-ink-mute hover:text-ink'
       }`}
     >
       {children}
       {count !== null && (
         <span
-          className={`rounded-pill px-[7px] py-[3px] font-mono text-[11px] font-bold ${
-            active ? 'bg-acid text-peel-900' : 'bg-hover text-ink-soft'
+          className={`rounded-pill px-[7px] py-[3px] font-mono text-micro font-bold ${
+            active ? 'bg-acid text-on-acid' : 'bg-hover text-ink-soft'
           }`}
         >
           {formatCount(count, more)}
@@ -398,11 +400,11 @@ function GameGrid({
   if (error) {
     return (
       <div className="flex flex-col items-center gap-3 pt-10 text-center">
-        <p className="text-[15px] font-bold text-ink">{error}</p>
+        <p className="text-body font-bold text-ink">{error}</p>
         <button
           type="button"
           onClick={onRetry}
-          className="inline-flex h-11 items-center rounded-pill border-2 border-line-strong px-5 text-[14px] font-bold text-ink transition-colors duration-150 hover:border-acid hover:text-acid"
+          className="inline-flex h-11 items-center rounded-pill border-2 border-line-strong px-5 text-body-sm font-bold text-ink transition-colors duration-[var(--dur-fast)] hover:border-accent-line hover:text-accent"
         >
           повторить
         </button>
@@ -425,12 +427,17 @@ function GameGrid({
 
   if (!games || games.length === 0) {
     // Пустая вкладка по макету 08: три пунктирные плитки 9:16, заголовок,
-    // объяснение и один выход. Никаких выдуманных цифр и карточек.
+    // объяснение и один выход. Мускот — один на экран, обрезан краем.
     return (
       <div
         data-empty-grid
-        className="flex flex-col items-center gap-[18px] pt-10 pb-6 text-center"
+        className="relative flex flex-col items-center gap-[18px] pt-10 pb-6 text-center"
       >
+        <Mascot
+          size={96}
+          tilt="c"
+          className="absolute top-1 right-0 translate-x-[18%] opacity-90"
+        />
         <div className="grid w-full max-w-[360px] grid-cols-3 gap-2 opacity-60">
           {[0, 1, 2].map((index) => (
             <span
@@ -439,15 +446,15 @@ function GameGrid({
             />
           ))}
         </div>
-        <p className="font-display text-[24px] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink">
+        <p className="font-display text-title-1 leading-title font-extrabold tracking-display text-ink">
           {emptyTitle}
         </p>
-        <p className="max-w-[320px] text-[14px] leading-[1.5] font-medium text-ink-soft">
+        <p className="max-w-[320px] text-body-sm leading-body font-medium text-ink-soft">
           {emptyText}
         </p>
         <Link
           href={emptyAction.href}
-          className="inline-flex h-12 items-center rounded-pill bg-acid px-5 text-[14px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94]"
+          className={buttonClass('primary', 'md')}
         >
           {emptyAction.label}
         </Link>
@@ -501,7 +508,7 @@ function AboutTab({
         />
       </dl>
 
-      <p className="rounded-lg border border-line bg-raised px-4 py-3 text-[13px] leading-[1.5] text-ink-mute">
+      <p className="rounded-lg border border-line bg-raised px-4 py-3 text-caption leading-body text-ink-mute">
         почта и телефон меняются только кодом подтверждения, экрана для этого
         пока нет. логин, имя, дата рождения и аватар редактируются здесь.
       </p>
@@ -522,15 +529,15 @@ function InfoRow({
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-1.5 rounded-lg border border-line bg-raised px-4 py-3.5">
-      <dt className="font-mono text-[10px] font-bold tracking-[0.1em] text-ink-mute uppercase">
+      <dt className="font-mono text-micro font-bold tracking-caps text-ink-mute uppercase">
         {label}
       </dt>
       <dd
-        className={`truncate text-[15px] font-semibold text-ink ${mono ? 'font-mono text-[13px] font-medium text-ink-soft' : ''}`}
+        className={`truncate text-body font-semibold text-ink ${mono ? 'font-mono text-caption font-medium text-ink-soft' : ''}`}
       >
         {value}
       </dd>
-      {note && <span className="text-[12px] text-ink-mute">{note}</span>}
+      {note && <span className="text-caption text-ink-mute">{note}</span>}
     </div>
   );
 }
@@ -553,7 +560,7 @@ function ProfileFrame({
   return (
     <div className="grid min-h-[60dvh] place-items-center px-4 text-center">
       <div className="flex max-w-[360px] flex-col items-center">
-        <p className="text-[17px] leading-[1.35] font-bold text-ink">{title}</p>
+        <p className="text-title-3 leading-body font-bold text-ink">{title}</p>
         {children}
       </div>
     </div>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { SessionResultScreen } from '@/features/game/session-result-screen';
 
 export const metadata: Metadata = {
-  title: 'Итог сессии — Hookster',
+  title: 'итог сессии — hookster',
 };
 
 /**

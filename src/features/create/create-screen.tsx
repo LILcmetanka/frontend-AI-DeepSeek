@@ -178,7 +178,7 @@ export function CreateScreen({ initialGameId }: { initialGameId: string }) {
   return (
     <div className="min-h-dvh bg-stage">
       <div className="flex min-h-dvh w-full items-start justify-center px-4 py-5 pb-24 dt:items-center dt:px-6 dt:py-10">
-        <div className="remix-card grid w-full max-w-[1060px] overflow-hidden rounded-xl border-2 border-acid bg-page dt:min-h-[560px] dt:grid-cols-[328px_1fr]">
+        <div className="remix-card grid w-full max-w-[1060px] overflow-hidden rounded-xl border-2 border-accent-line bg-page dt:min-h-[560px] dt:grid-cols-[328px_1fr]">
           <SourcePanel
             game={sourceGame.data}
             pending={gameId !== '' && sourceGame.isPending}
@@ -189,14 +189,14 @@ export function CreateScreen({ initialGameId }: { initialGameId: string }) {
 
           <div className="flex min-w-0 flex-col gap-5 p-4 dt:p-7">
             <header className="flex items-start gap-3.5">
-              <span className="grid h-11 w-11 flex-none place-items-center rounded-pill bg-acid text-peel-900">
+              <span className="grid h-11 w-11 flex-none place-items-center rounded-pill bg-acid text-on-acid">
                 <WandIcon className="h-[22px] w-[22px]" />
               </span>
               <div className="min-w-0 flex-1">
-                <h1 className="m-0 font-display text-[22px] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink dt:text-[24px]">
+                <h1 className="m-0 font-display text-title-2 leading-title font-extrabold tracking-display text-ink dt:text-title-1">
                   сделать ремикс
                 </h1>
-                <p className="mt-1.5 mb-0 text-[13px] leading-[1.5] font-medium text-ink-soft dt:text-[14px]">
+                <p className="mt-1.5 mb-0 text-caption leading-body font-medium text-ink-soft dt:text-body-sm">
                   генерация идёт поверх исходной игры: механика остаётся, ассеты
                   и правила собираются заново.
                 </p>
@@ -204,7 +204,7 @@ export function CreateScreen({ initialGameId }: { initialGameId: string }) {
               <Link
                 href="/feed"
                 aria-label="закрыть и вернуться в ленту"
-                className="grid h-9 w-9 flex-none place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-150 hover:bg-hover-strong active:scale-[0.94]"
+                className="grid h-9 w-9 flex-none place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-[var(--dur-fast)] hover:bg-hover-strong active:scale-[0.94]"
               >
                 <CloseIcon className="h-[18px] w-[18px]" />
               </Link>

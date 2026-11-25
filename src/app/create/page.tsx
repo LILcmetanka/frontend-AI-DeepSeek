@@ -3,7 +3,7 @@ import { CreateScreen } from '@/features/create/create-screen';
 import { RequireAuth } from '@/shared/lib/require-auth';
 
 export const metadata: Metadata = {
-  title: 'AI Remix — Hookster',
+  title: 'AI Remix — hookster',
 };
 
 /**

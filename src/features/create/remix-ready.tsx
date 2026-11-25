@@ -73,15 +73,15 @@ export function RemixReady({
             }}
           />
 
-          <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-pill bg-acid px-3 py-1.5 font-mono text-[10px] font-bold tracking-[0.12em] text-peel-900 uppercase">
+          <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-pill bg-acid px-3 py-1.5 font-mono text-micro font-bold tracking-caps text-on-acid uppercase">
             твой ремикс
           </span>
 
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-4 dt:gap-2 dt:p-5">
-            <div className="scrim-title font-display text-[17px] leading-[1.08] font-extrabold tracking-[-0.03em] text-peel-25 dt:text-[22px]">
+            <div className="scrim-title font-display text-title-3 leading-title font-extrabold tracking-display text-peel-25 dt:text-title-2">
               {title}
             </div>
-            <div className="truncate font-mono text-[11px] text-peel-300">
+            <div className="truncate font-mono text-micro text-peel-300">
               {meta}
             </div>
           </div>
@@ -90,13 +90,13 @@ export function RemixReady({
         {/* итог и действия */}
         <div className="flex min-w-0 flex-1 flex-col gap-5 dt:max-w-[500px]">
           <div className="flex flex-col gap-2">
-            <span className="font-mono text-[11px] font-bold tracking-[0.14em] text-acid uppercase">
+            <span className="font-mono text-micro font-bold tracking-caps text-accent uppercase">
               {elapsedSec > 0 ? `готово за ${formatDuration(elapsedSec)}` : 'готово'}
             </span>
-            <h1 className="m-0 font-display text-[28px] leading-[1.05] font-black tracking-[-0.035em] text-ink dt:text-[36px]">
+            <h1 className="m-0 font-display text-title-1 leading-title font-black tracking-display text-ink dt:text-display-3">
               это твоя версия
             </h1>
-            <p className="m-0 max-w-[44ch] text-[15px] leading-[1.5] font-medium text-ink-soft">
+            <p className="m-0 max-w-[44ch] text-body leading-body font-medium text-ink-soft">
               механика осталась от оригинала, всё остальное собрано заново.
               Можно играть сразу или переделать ещё раз.
             </p>
@@ -104,17 +104,17 @@ export function RemixReady({
 
           {prompt && (
             <div className="flex flex-col gap-2.5 rounded-lg border border-line bg-raised p-[18px]">
-              <span className="font-mono text-[11px] font-bold tracking-[0.14em] text-ink-mute uppercase">
+              <span className="font-mono text-micro font-bold tracking-caps text-ink-mute uppercase">
                 твой промпт
               </span>
-              <p className="m-0 max-h-[132px] overflow-y-auto font-mono text-[12px] leading-[1.6] text-ink-soft whitespace-pre-wrap">
+              <p className="m-0 max-h-[132px] overflow-y-auto font-mono text-caption leading-loose text-ink-soft whitespace-pre-wrap">
                 {prompt}
               </p>
             </div>
           )}
 
           {game.isError && (
-            <p className="m-0 rounded-md border border-hot/40 bg-[rgba(255,46,147,0.12)] px-3.5 py-3 text-[13px] leading-[1.5] font-semibold text-hot-200">
+            <p className="m-0 rounded-md border border-danger/40 bg-danger/10 px-3.5 py-3 text-caption leading-body font-semibold text-danger">
               игра сохранена, но карточка не загрузилась — можно играть, а
               название подтянется позже
             </p>
@@ -123,7 +123,7 @@ export function RemixReady({
           <div className="flex flex-col gap-2.5">
             <Link
               href={`/feed/${gameId}`}
-              className="inline-flex h-14 w-full items-center justify-center gap-2.5 rounded-pill bg-acid text-[16px] font-extrabold text-peel-900 transition-[background,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi hover:shadow-[0_0_24px_rgba(198,255,46,0.45)] active:scale-[0.94]"
+              className="inline-flex h-14 w-full items-center justify-center gap-2.5 rounded-pill bg-acid text-body font-extrabold text-on-acid transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-acid-hi hover:shadow-glow active:scale-[0.94]"
             >
               <PlayIcon className="h-5 w-5" />
               играть
@@ -132,7 +132,7 @@ export function RemixReady({
             <div className="flex flex-col gap-2.5 sm:flex-row">
               <Link
                 href={`/create?gameId=${encodeURIComponent(gameId)}`}
-                className="inline-flex h-[50px] flex-1 items-center justify-center gap-2 rounded-pill border-2 border-line-strong text-[15px] font-bold text-ink transition-[border-color,color,transform] duration-150 hover:-translate-y-0.5 hover:border-acid hover:text-acid active:scale-[0.94]"
+                className="inline-flex h-[50px] flex-1 items-center justify-center gap-2 rounded-pill border-2 border-line-strong text-body font-bold text-ink transition-[border-color,color,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:border-accent-line hover:text-accent active:scale-[0.94]"
               >
                 <RotateIcon className="h-[19px] w-[19px]" />
                 ещё ремикс
@@ -141,7 +141,7 @@ export function RemixReady({
               {sourceGameId && sourceGameId !== gameId && (
                 <Link
                   href={`/feed/${sourceGameId}`}
-                  className="inline-flex h-[50px] flex-1 items-center justify-center gap-2 rounded-pill border-2 border-line-strong text-[15px] font-bold text-ink transition-[border-color,color,transform] duration-150 hover:-translate-y-0.5 hover:border-acid hover:text-acid active:scale-[0.94]"
+                  className="inline-flex h-[50px] flex-1 items-center justify-center gap-2 rounded-pill border-2 border-line-strong text-body font-bold text-ink transition-[border-color,color,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:border-accent-line hover:text-accent active:scale-[0.94]"
                 >
                   к оригиналу
                 </Link>
@@ -149,7 +149,7 @@ export function RemixReady({
             </div>
           </div>
 
-          <p className="m-0 font-mono text-[11px] text-ink-mute">
+          <p className="m-0 font-mono text-micro text-ink-mute">
             игра уже в ленте — её видно в «мои игры» и рекомендациях
           </p>
         </div>

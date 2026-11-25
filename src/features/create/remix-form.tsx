@@ -6,11 +6,13 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { WandIcon } from '@/components/ui/icons';
 import { TraceIdNote } from '@/components/ui/trace-id-note';
+import { buttonClass } from '@/components/ui/controls';
 import type { GameDto } from '@/shared/api/axios-instance';
 
 /**
  * Поле промпта из макета 06: многострочное, моноширинное, с «>» и счётчиком,
- * под ним — чипсы-подсказки. Запуск — одна кнопка «собрать ремикс».
+ * под ним — чипсы-подсказки. Запуск — одна кнопка «ремикс» внутри поля,
+ * как в специмене prompt-field: одна лаймовая primary на экран.
  *
  * IN_0001: 1…1500 символов из алфавита, который принимает оркестратор
  * (кириллица, латиница, цифры, обычные знаки). Проверяем на клиенте те же
@@ -105,15 +107,19 @@ export function RemixForm({
       <div className="flex flex-col gap-2.5">
         <label
           htmlFor="remix-prompt"
-          className="font-mono text-[11px] font-bold tracking-[0.14em] text-acid uppercase"
+          className="font-mono text-micro font-bold tracking-caps text-accent uppercase"
         >
           что поменять
         </label>
 
-        <div className="relative">
+        <div
+          className={`relative rounded-lg border-2 bg-input transition-shadow duration-[var(--dur-fast)] focus-within:shadow-glow-strong ${
+            error ? 'border-danger' : 'border-lime-300'
+          }`}
+        >
           <span
             aria-hidden
-            className="pointer-events-none absolute top-3.5 left-4 font-mono text-[14px] leading-[1.5] text-acid"
+            className="pointer-events-none absolute top-3.5 left-4 font-mono text-body-sm leading-body text-accent"
           >
             &gt;
           </span>
@@ -125,10 +131,22 @@ export function RemixForm({
             placeholder="босс в два раза больше, пули как бананы, фон — ночная кухня"
             aria-invalid={error !== undefined}
             aria-describedby="remix-prompt-help"
-            className={`min-h-[96px] w-full resize-y rounded-md border bg-peel-700 py-3.5 pr-3.5 pl-9 font-mono text-[14px] leading-[1.5] text-ink transition-colors duration-150 outline-none placeholder:text-ink-mute focus:border-acid ${
-              error ? 'border-hot' : 'border-line'
-            }`}
+            className="min-h-[96px] w-full resize-y rounded-[10px] bg-transparent py-3.5 pr-4 pb-12 pl-9 font-mono text-body-sm leading-body text-ink outline-none placeholder:text-ink-mute"
           />
+          {/* Кнопка «ремикс» внутри поля — как в специмене prompt-field. */}
+          <div className="pointer-events-none absolute inset-x-3 bottom-2.5 flex items-center justify-between gap-3">
+            <span className="font-mono text-micro text-ink-mute tabular-nums">
+              {prompt?.length ?? 0} / {PROMPT_MAX}
+            </span>
+            <button
+              type="submit"
+              disabled={!canStart}
+              className={`pointer-events-auto ${buttonClass('primary', 'sm', 'gap-1.5')}`}
+            >
+              <WandIcon className="h-[15px] w-[15px]" />
+              {pending ? 'запускаем…' : 'ремикс'}
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
@@ -137,7 +155,7 @@ export function RemixForm({
               key={chip}
               type="button"
               onClick={() => addChip(chip)}
-              className="rounded-pill bg-hover px-[11px] py-[7px] font-mono text-[11px] text-ink-soft transition-[background,color,transform] duration-150 hover:bg-[rgba(198,255,46,0.22)] hover:text-ink active:scale-[0.94]"
+              className="rounded-pill bg-hover px-[11px] py-[7px] font-mono text-micro text-ink-soft transition-[background,color,transform] duration-[var(--dur-fast)] hover:bg-acid/20 hover:text-ink active:scale-[0.94]"
             >
               {chip}
             </button>
@@ -149,9 +167,9 @@ export function RemixForm({
           className="flex items-start justify-between gap-3"
         >
           {error ? (
-            <span className="text-[12px] font-semibold text-hot-200">{error}</span>
+            <span className="text-caption font-semibold text-danger">{error}</span>
           ) : game ? (
-            <span className="line-clamp-2 text-[12px] leading-[1.45] text-ink-soft">
+            <span className="line-clamp-2 text-caption leading-body text-ink-soft">
               механика {game.title ? `«${game.title}»` : 'шаблона'} останется,
               ассеты и правила соберутся заново
             </span>
@@ -159,12 +177,12 @@ export function RemixForm({
             <button
               type="button"
               onClick={onPick}
-              className="text-[12px] font-semibold text-acid underline-offset-2 transition-colors hover:underline"
+              className="text-caption font-semibold text-accent underline-offset-2 transition-colors hover:underline"
             >
               сначала выбери исходную игру
             </button>
           )}
-          <span className="flex-none font-mono text-[11px] text-ink-mute tabular-nums">
+          <span className="flex-none font-mono text-micro text-ink-mute tabular-nums">
             {prompt?.length ?? 0} / {PROMPT_MAX}
           </span>
         </div>
@@ -173,7 +191,7 @@ export function RemixForm({
       {errorText && (
         <p
           role="alert"
-          className="rounded-md border border-hot/40 bg-[rgba(255,46,147,0.12)] px-3.5 py-3 text-[13px] leading-[1.5] font-semibold text-hot-200"
+          className="rounded-md border border-danger/40 bg-danger/10 px-3.5 py-3 text-caption leading-body font-semibold text-danger"
         >
           {errorText}
         </p>
@@ -183,26 +201,17 @@ export function RemixForm({
       <TraceIdNote error={traceError} />
 
       <div className="flex flex-col gap-2.5">
-        <div className="flex flex-col gap-2.5 dt:flex-row dt:items-center">
-          <button
-            type="submit"
-            disabled={!canStart}
-            className="inline-flex h-[54px] w-full items-center justify-center gap-2.5 rounded-pill bg-acid text-[16px] font-extrabold whitespace-nowrap text-peel-900 transition-[background,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi hover:shadow-[0_0_24px_rgba(198,255,46,0.45)] active:scale-[0.94] disabled:pointer-events-none disabled:opacity-50 dt:flex-1"
-          >
-            <WandIcon className="h-5 w-5" />
-            {pending ? 'запускаем…' : 'собрать ремикс'}
-          </button>
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
           <Link
             href="/feed"
-            className="inline-flex h-[54px] flex-none items-center justify-center rounded-pill border-2 border-line-strong px-[20px] text-[15px] font-bold text-ink transition-[border-color,color,transform] duration-150 hover:-translate-y-0.5 hover:border-acid hover:text-acid active:scale-[0.94]"
+            className="inline-flex h-[42px] flex-none items-center justify-center rounded-pill border-2 border-line-strong px-[18px] text-body-sm font-bold text-ink transition-[border-color,color,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:border-accent-line hover:text-accent active:scale-[0.94]"
           >
             отмена
           </Link>
+          <p className="font-mono text-micro text-ink-mute">
+            3 генерации в сутки · лимит считается по календарным суткам
+          </p>
         </div>
-
-        <p className="font-mono text-[11px] text-ink-mute">
-          3 генерации в сутки · лимит считается по календарным суткам
-        </p>
       </div>
     </form>
   );

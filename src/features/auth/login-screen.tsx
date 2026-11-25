@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import { api, type ErrorDto } from '@/shared/api/axios-instance';
+import { Button, Field, Input } from '@/components/ui/controls';
 import { setAccessToken } from '@/shared/lib/auth';
 
 /**
@@ -131,7 +132,7 @@ export function LoginScreen() {
       return;
     }
     if (type === 'email' && !contact.identifier.includes('@')) {
-      setError('Почта должна содержать @');
+      setError('почта должна содержать @');
       return;
     }
     if (type === 'phone' && !/^\d{10,15}$/.test(contact.identifier)) {
@@ -182,13 +183,13 @@ export function LoginScreen() {
     <section className="flex min-h-full items-start justify-center px-4 pt-6 pb-24 dt:items-center dt:pt-0">
       <div className="w-full max-w-[420px] rounded-xl border border-line bg-raised p-6">
         <div className="flex flex-col gap-1.5">
-          <h1 className="font-display text-[26px] leading-tight font-black tracking-[-0.035em] text-ink">
-            {step === 'identifier' ? 'Вход в hookster' : 'Код из письма'}
+          <h1 className="font-display text-title-1 leading-title font-black tracking-display text-ink">
+            {step === 'identifier' ? 'вход в hookster' : 'код из письма'}
           </h1>
-          <p className="text-[13px] leading-[1.5] text-ink-soft">
+          <p className="text-caption leading-body text-ink-soft">
             {step === 'identifier'
-              ? 'Пришлём шестизначный код на почту или телефон — пароль не нужен.'
-              : `Код ушёл на ${identifier.trim()}. Он живёт несколько минут.`}
+              ? 'пришлём шестизначный код на почту или телефон — пароль не нужен'
+              : `код ушёл на ${identifier.trim()}. он живёт несколько минут`}
           </p>
         </div>
 
@@ -213,11 +214,15 @@ export function LoginScreen() {
               </TypeTab>
             </div>
 
-            <label className="flex flex-col gap-1.5">
-              <span className="font-mono text-[10px] font-bold tracking-[0.14em] text-ink-mute uppercase">
-                {type === 'email' ? 'email' : 'телефон'}
-              </span>
-              <input
+            <Field
+              label={type === 'email' ? 'почта' : 'телефон'}
+              hint={
+                type === 'email'
+                  ? 'код придёт письмом, пароль не нужен'
+                  : 'в формате 79123456789'
+              }
+            >
+              <Input
                 type={type === 'email' ? 'email' : 'tel'}
                 inputMode={type === 'email' ? 'email' : 'tel'}
                 autoComplete={type === 'email' ? 'email' : 'tel'}
@@ -225,17 +230,12 @@ export function LoginScreen() {
                 placeholder={type === 'email' ? 'you@example.com' : '79123456789'}
                 value={identifier}
                 onChange={(event) => setIdentifier(event.target.value)}
-                className="rounded-pill border border-line bg-peel-950 px-4 py-3 font-mono text-[14px] text-ink transition-colors duration-150 placeholder:text-ink-mute hover:border-line-strong focus:border-lime-300 focus:shadow-[0_0_0_3px_rgba(198,255,46,0.25)] focus:outline-none"
               />
-            </label>
+            </Field>
 
-            <button
-              type="submit"
-              disabled={pending}
-              className="h-[50px] rounded-pill bg-acid text-[15px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94] disabled:pointer-events-none disabled:opacity-60"
-            >
+            <Button type="submit" size="lg" disabled={pending}>
               {pending ? 'отправляем…' : 'получить код'}
-            </button>
+            </Button>
           </form>
         ) : (
           <form
@@ -243,7 +243,7 @@ export function LoginScreen() {
             onSubmit={(event) => {
               event.preventDefault();
               if (code.length !== CODE_LENGTH) {
-                setError('Введите все шесть цифр');
+                setError('введи все шесть цифр');
                 return;
               }
               void verify(code);
@@ -272,7 +272,7 @@ export function LoginScreen() {
                   maxLength={1}
                   disabled={pending}
                   aria-label={`цифра ${index + 1}`}
-                  className="h-[56px] w-full min-w-0 rounded-md border border-line bg-peel-950 text-center font-mono text-[22px] font-bold text-ink transition-colors duration-150 hover:border-line-strong focus:border-lime-300 focus:shadow-[0_0_0_3px_rgba(198,255,46,0.25)] focus:outline-none"
+                  className="h-[56px] w-full min-w-0 rounded-md border border-line bg-peel-950 text-center font-mono text-title-2 font-bold text-ink transition-colors duration-[var(--dur-fast)] hover:border-line-strong focus:border-lime-300 focus:shadow-glow-strong focus:outline-none"
                 />
               ))}
             </div>
@@ -280,7 +280,7 @@ export function LoginScreen() {
             <button
               type="submit"
               disabled={pending || code.length !== CODE_LENGTH}
-              className="h-[50px] rounded-pill bg-acid text-[15px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94] disabled:pointer-events-none disabled:opacity-60"
+              className="h-[50px] rounded-pill bg-acid text-body font-extrabold text-on-acid transition-[background,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94] disabled:pointer-events-none disabled:opacity-60"
             >
               {pending ? 'проверяем…' : 'войти'}
             </button>
@@ -295,7 +295,7 @@ export function LoginScreen() {
                   setNotice(null);
                   setCooldown(0);
                 }}
-                className="font-mono text-[12px] text-ink-mute transition-colors duration-150 hover:text-ink"
+                className="font-mono text-caption text-ink-mute transition-colors duration-[var(--dur-fast)] hover:text-ink"
               >
                 изменить контакт
               </button>
@@ -303,7 +303,7 @@ export function LoginScreen() {
                 type="button"
                 disabled={cooldown > 0 || pending}
                 onClick={() => void sendCode(currentContact(), true)}
-                className="font-mono text-[12px] text-ink-mute transition-colors duration-150 hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
+                className="font-mono text-caption text-ink-mute transition-colors duration-[var(--dur-fast)] hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {cooldown > 0
                   ? `отправить снова через ${cooldown} с`
@@ -314,14 +314,14 @@ export function LoginScreen() {
         )}
 
         {notice && (
-          <p className="mt-3 rounded-md border border-lime-300/40 bg-lime-300/10 p-3 text-[13px] text-lime-100">
+          <p className="mt-3 rounded-md border border-lime-300/40 bg-lime-300/10 p-3 text-caption text-lime-100">
             {notice}
           </p>
         )}
         {error && (
           <p
             role="alert"
-            className="mt-3 rounded-md border border-hot-300/50 bg-hot-300/10 p-3 text-[13px] leading-[1.5] text-hot-200"
+            className="mt-3 rounded-md border border-hot-300/50 bg-hot-300/10 p-3 text-caption leading-body text-danger"
           >
             {error}
           </p>
@@ -346,7 +346,7 @@ function TypeTab({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`rounded-pill px-3.5 py-2 font-mono text-[12px] transition-[background,color,transform] duration-150 active:scale-[0.96] ${
+      className={`rounded-pill px-3.5 py-2 font-mono text-caption transition-[background,color,transform] duration-[var(--dur-fast)] active:scale-[0.96] ${
         active
           ? 'bg-hover-strong font-bold text-ink'
           : 'bg-hover text-ink-soft hover:text-ink'
@@ -376,17 +376,17 @@ function errorCode(error: unknown): string {
 function sendErrorText(error: unknown): string {
   switch (errorCode(error)) {
     case 'VALIDATION_ERROR':
-      return 'Проверьте адрес: почта или телефон введены неверно';
+      return 'проверь адрес: почта или телефон введены неверно';
     case 'TOO_MANY_REQUESTS':
-      return 'Слишком много попыток — подождите минуту';
+      return 'слишком много попыток — подожди минуту';
     case 'SERVICE_UNAVAILABLE':
-      return 'Сервис входа недоступен — попробуйте позже';
+      return 'сервис входа недоступен — попробуй позже';
     case 'TIMEOUT':
-      return 'Сервис не ответил вовремя — попробуйте ещё раз';
+      return 'сервис не ответил вовремя — попробуй ещё раз';
     default:
       return axios.isAxiosError(error) && !error.response
-        ? 'Нет связи с сервером — проверьте сеть'
-        : 'Не удалось отправить код';
+        ? 'нет связи с сервером — проверь сеть'
+        : 'не удалось отправить код';
   }
 }
 
@@ -394,19 +394,19 @@ function sendErrorText(error: unknown): string {
 function verifyErrorText(error: unknown): string {
   switch (errorCode(error)) {
     case 'CODE_NOT_FOUND_OR_EXPIRED':
-      return 'Код не подошёл или истёк. Проверьте цифры или запросите новый.';
+      return 'код не подошёл или истёк. проверь цифры или запроси новый';
     case 'VALIDATION_ERROR':
-      return 'Код из шести цифр — без пробелов и букв';
+      return 'код из шести цифр — без пробелов и букв';
     case 'TOO_MANY_REQUESTS':
-      return 'Слишком много попыток — подождите минуту';
+      return 'слишком много попыток — подожди минуту';
     case 'SERVICE_UNAVAILABLE':
-      return 'Сервис входа недоступен — попробуйте позже';
+      return 'сервис входа недоступен — попробуй позже';
     case 'TIMEOUT':
-      return 'Сервис не ответил вовремя — попробуйте ещё раз';
+      return 'сервис не ответил вовремя — попробуй ещё раз';
     default:
       return axios.isAxiosError(error) && !error.response
-        ? 'Нет связи с сервером — проверьте сеть'
-        : 'Не удалось войти';
+        ? 'нет связи с сервером — проверь сеть'
+        : 'не удалось войти';
   }
 }
 

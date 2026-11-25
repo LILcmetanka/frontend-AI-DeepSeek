@@ -39,19 +39,19 @@ export function TraceIdNote({
   return (
     <p
       data-trace-id={traceId}
-      className={`mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-mono text-[11px] leading-[1.4] text-ink-mute ${className}`}
+      className={`mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-mono text-micro leading-body text-ink-mute ${className}`}
     >
       <span>код запроса</span>
       <span className="select-all">{traceId}</span>
       <button
         type="button"
         onClick={() => void copy()}
-        className="rounded-pill border border-line px-2 py-0.5 font-sans text-[11px] font-bold text-ink-soft transition-colors hover:border-acid hover:text-acid"
+        className="rounded-pill border border-line px-2 py-0.5 font-sans text-micro font-bold text-ink-soft transition-colors hover:border-accent-line hover:text-accent"
       >
         {copied ? 'скопировано' : 'скопировать'}
       </button>
-      <span className="w-full font-sans text-[11px] text-ink-mute">
-        назовите этот код при обращении
+      <span className="w-full font-sans text-micro text-ink-mute">
+        назови этот код при обращении
       </span>
     </p>
   );
