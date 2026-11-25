@@ -15,6 +15,7 @@ import {
   sendEvent,
   type GameDto,
 } from '@/shared/api/axios-instance';
+import { authorHandle } from '@/shared/lib/author';
 import { getGameCached } from '@/shared/lib/game-cache';
 import { GamePlayer, type PlayerEvent } from '@/shared/lib/game-player';
 import { formatDuration, saveSessionResult } from '@/shared/lib/session-result';
@@ -132,7 +133,7 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
 
   const title = data?.title || 'Игра';
   const genre = data?.genreTitles?.[0];
-  const author = data ? `@${data.authorId.slice(0, 8)}` : '';
+  const author = data ? authorHandle(data.authorId) : '';
 
   return (
     <div className="relative flex h-full w-full items-center justify-center bg-stage dt:p-6">
@@ -228,7 +229,7 @@ export function PlayingScreen({ gameId }: { gameId: string }) {
                 </span>
               </div>
 
-              <h1 className="scrim-title font-display text-[22px] leading-[1.06] font-extrabold tracking-[-0.03em] text-peel-25 sm:text-[23px]">
+              <h1 className="scrim-title line-clamp-2 font-display text-[22px] leading-[1.06] font-extrabold tracking-[-0.03em] text-peel-25 sm:text-[23px]">
                 {title}
               </h1>
 

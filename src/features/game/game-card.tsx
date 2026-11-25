@@ -5,6 +5,7 @@ import { HooksterFace } from '@/components/ui/icons';
 import { GameOverlays } from '@/features/game/game-overlays';
 import { StageBackdrop } from '@/features/game/stage-backdrop';
 import type { GameDto } from '@/shared/api/axios-instance';
+import { authorHandle } from '@/shared/lib/author';
 
 /**
  * Карточка игры в ленте — по макету «Главная · лента»: сверху и снизу
@@ -25,7 +26,7 @@ interface GameCardProps {
 export function GameCard({ game, liked, onLike, onNotify }: GameCardProps) {
   const title = game.title || 'без названия';
   const genre = game.genreTitles?.[0];
-  const author = `@${game.authorId.slice(0, 8)}`;
+  const author = authorHandle(game.authorId);
 
   return (
     <article className="relative h-full w-full overflow-hidden bg-stage select-none">
@@ -80,7 +81,9 @@ export function GameCard({ game, liked, onLike, onNotify }: GameCardProps) {
             </button>
           </div>
 
-          <h2 className="scrim-title font-display text-[22px] leading-[1.06] font-extrabold tracking-[-0.03em] text-peel-25 sm:text-[23px]">
+          {/* Длинное название — две строки и многоточие, иначе оно выдавит
+              оверлеи и подпись за нижний край кадра. */}
+          <h2 className="scrim-title line-clamp-2 font-display text-[22px] leading-[1.06] font-extrabold tracking-[-0.03em] text-peel-25 sm:text-[23px]">
             {title}
           </h2>
 

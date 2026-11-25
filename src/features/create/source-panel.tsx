@@ -3,6 +3,7 @@
 import { HooksterFace } from '@/components/ui/icons';
 import { StageBackdrop } from '@/features/game/stage-backdrop';
 import type { GameDto } from '@/shared/api/axios-instance';
+import { authorHandle } from '@/shared/lib/author';
 
 /**
  * Левая колонка макета 06: исходная игра, поверх которой идёт генерация.
@@ -110,7 +111,7 @@ export function SourcePanel({
 
 /** «@автор · жанр» — только то, что есть в карточке игры. */
 function gameMeta(game: GameDto): string {
-  const parts = [`@${game.authorId.slice(0, 8)}`];
+  const parts = [authorHandle(game.authorId)];
   const genre = game.genreTitles?.[0];
   if (genre) parts.push(genre);
   return parts.join(' · ');
