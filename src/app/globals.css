@@ -2,16 +2,47 @@
 @import "tailwindcss";
 
 /*
- * Токены дизайн-макета Hookster (design/gaming-feed-design/tokens).
- * Значения один в один из макета: не подбирать «на глаз» и не вводить
- * свою палитру — тёмная тема продукта, жёлтый banana и кислый lime.
+ * HOOKSTER · ДИЗАЙН-СИСТЕМА
+ * Источник: Hookster-AI/design/gaming-feed-design/uploads/Hookster дизайн-система (2)
+ *   tokens/colors.css · typography.css · space.css · motion.css · fonts.css
+ *
+ * Правило файла: значения берутся из системы один в один. Свои оттенки,
+ * радиусы и тайминги не вводим — если чего-то нет, значит этого нет в
+ * дизайн-системе. Тёмная тема — по умолчанию (`:root`), светлая —
+ * `[data-theme="light"]` на любом элементе (в системе так же).
  */
+
+/* ===================== ПАЛИТРА ===================== */
 @theme {
   --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
   --font-text: "Manrope", "Helvetica Neue", Helvetica, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
 
-  /* peel — тёплые нейтрали */
+  /* banana — жёлтый, второй голос бренда */
+  --color-banana-50: #fffce6;
+  --color-banana-100: #fff7b8;
+  --color-banana-200: #ffef7a;
+  --color-banana-300: #ffe23d;
+  --color-banana-400: #ffd100;
+  --color-banana-500: #f5bc00;
+  --color-banana-600: #c99500;
+  --color-banana-700: #8f6900;
+  --color-banana-800: #5c4300;
+  --color-banana-900: #2e2100;
+
+  /* lime — кислота, единственный сигнал «здесь можно нажать» */
+  --color-lime-50: #f4ffde;
+  --color-lime-100: #e4ffb0;
+  --color-lime-200: #d2ff70;
+  --color-lime-300: #c6ff2e;
+  --color-lime-400: #a8f000;
+  --color-lime-500: #8cd000;
+  --color-lime-600: #6ba300;
+  --color-lime-700: #4e7500;
+  --color-lime-800: #334c00;
+  --color-lime-900: #1b2800;
+
+  /* peel — тёплые нейтрали с уходом в зелёный */
   --color-peel-0: #ffffff;
   --color-peel-25: #fbfbf4;
   --color-peel-50: #f2f2e8;
@@ -26,70 +57,132 @@
   --color-peel-900: #0d0d07;
   --color-peel-950: #060603;
 
-  /* banana — ядро бренда */
-  --color-banana-100: #fff7b8;
-  --color-banana-200: #ffef7a;
-  --color-banana-300: #ffe23d;
-  --color-banana-400: #ffd100;
-  --color-banana-500: #f5bc00;
+  /* stem — только иллюстрации и мускот */
+  --color-stem-300: #8b5e24;
+  --color-stem-500: #5a3a14;
 
-  /* lime — кислота */
-  --color-lime-50: #f4ffde;
-  --color-lime-100: #e4ffb0;
-  --color-lime-200: #d2ff70;
-  --color-lime-300: #c6ff2e;
-  --color-lime-400: #a8f000;
-  --color-lime-600: #6ba300;
-
-  /* hot — единственный не-банановый акцент */
+  /* hot — единственный не-банановый акцент (live, запись, деструктив) */
   --color-hot-200: #ff8fc6;
   --color-hot-300: #ff2e93;
+  --color-hot-500: #c8006b;
 
-  /* семантика поверхностей и текста */
-  --color-stage: #060603;
-  --color-page: #0d0d07;
-  --color-raised: #17170f;
-  --color-ink: #fbfbf4;
-  --color-ink-dim: #e6e6d8;
-  --color-ink-soft: #a8a897;
-  --color-ink-mute: #7a7a6b;
-  --color-line: rgba(242, 242, 232, 0.12);
-  --color-line-strong: rgba(242, 242, 232, 0.28);
-  --color-hover: rgba(242, 242, 232, 0.08);
-  --color-hover-strong: rgba(242, 242, 232, 0.16);
-  --color-acid: #c6ff2e;
-  --color-acid-hi: #d2ff70;
-  --color-acid-lo: #a8f000;
-  --color-banana: #ffe23d;
-  --color-hot: #ff2e93;
+  /* фиксированные бренд-акценты */
+  --color-acid: var(--color-lime-300);
+  --color-acid-hi: var(--color-lime-200);
+  --color-acid-lo: var(--color-lime-400);
+  --color-banana: var(--color-banana-300);
+  --color-hot: var(--color-hot-300);
 
-  /* макет считает десктопом всё от 900 px, а не от 1024 (lg) */
-  --breakpoint-dt: 900px;
+  /*
+   * Семантические утилиты приложения. Все — ссылки на токены темы, поэтому
+   * меняются вместе с `[data-theme]`; имена оставлены прежними, чтобы
+   * экраны не переписывать с нуля.
+   */
+  --color-base: var(--bg-base);
+  --color-sunken: var(--bg-sunken);
+  /* `stage` — фон вокруг кадра игры, `page` — фон страницы */
+  --color-stage: var(--bg-sunken);
+  --color-page: var(--bg-base);
+  --color-raised: var(--bg-raised);
+  --color-card: var(--surface-card);
+  --color-card-hover: var(--surface-card-hover);
+  --color-input: var(--surface-input);
+  --color-overlay: var(--bg-overlay);
+  /* чуть плотнее — состояние hover оверлеев поверх игры */
+  --color-overlay-strong: var(--bg-overlay-strong);
+  /* инверсная плашка: тост на тёмном — светлый, на светлом — чернильный */
+  --color-inverse: var(--surface-inverse);
+  --color-on-inverse: var(--text-inverse);
 
-  /* радиусы и тени из макета */
+  --color-ink: var(--text-primary);
+  --color-ink-soft: var(--text-secondary);
+  --color-ink-mute: var(--text-muted);
+  --color-ink-dim: var(--text-primary);
+  /* текст-акцент: лайм на тёмном, lime-700 на светлом (читаемый) */
+  --color-accent: var(--text-accent);
+  --color-accent-line: var(--border-accent);
+  --color-on-acid: var(--action-primary-fg);
+
+  --color-line: var(--border-subtle);
+  --color-line-strong: var(--border-strong);
+  --color-hover: var(--action-secondary-bg);
+  --color-hover-strong: var(--action-secondary-hover);
+
+  --color-success: var(--state-success);
+  --color-warning: var(--state-warning);
+  --color-danger: var(--state-danger);
+  --color-live: var(--state-live);
+
+  /* ===================== ТИПОГРАФИКА ===================== */
+  /* шкала: 88 / 64 / 48 / 36 / 28 / 22 / 18 / 16 / 14 / 13 / 11 */
+  --text-hero: 88px;
+  --text-display-1: 64px;
+  --text-display-2: 48px;
+  --text-display-3: 36px;
+  --text-title-1: 28px;
+  --text-title-2: 22px;
+  --text-title-3: 18px;
+  --text-body-lg: 18px;
+  --text-body: 16px;
+  --text-body-sm: 14px;
+  --text-caption: 13px;
+  --text-micro: 11px;
+
+  --leading-tight: 0.92;
+  --leading-display: 1.02;
+  --leading-title: 1.15;
+  --leading-body: 1.5;
+  --leading-loose: 1.65;
+
+  --tracking-display: -0.04em;
+  --tracking-title: -0.02em;
+  --tracking-body: 0em;
+  --tracking-caps: 0.14em;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  --font-weight-black: 900;
+
+  /* ===================== РАДИУСЫ ===================== */
   --radius-xs: 6px;
   --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-xl: 28px;
+  --radius-2xl: 36px;
+  --radius-3xl: 36px;
   --radius-pill: 999px;
+  --radius-blob: 62% 38% 55% 45% / 48% 56% 44% 52%;
 
+  /* ===================== ТЕНИ / СВЕЧЕНИЕ ===================== */
   --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.45);
   --shadow-pop: 0 24px 64px rgba(0, 0, 0, 0.55);
   --shadow-stick: 4px 4px 0 var(--color-lime-600);
+  --shadow-hard: 6px 6px 0 var(--brand-ink);
+  --shadow-hard-sm: 3px 3px 0 var(--brand-ink);
+  --shadow-hard-lime: 6px 6px 0 var(--color-lime-400);
+  --shadow-glow: var(--glow-lime);
+  --shadow-glow-strong: var(--glow-lime-strong);
 
-  /* движение из tokens/motion.css */
+  /* ===================== ДВИЖЕНИЕ ===================== */
+  --ease-boing: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-snap: cubic-bezier(0.2, 0.9, 0.2, 1);
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-boing: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-fast: cubic-bezier(0.5, 0, 0.9, 0.3);
 
-  --animate-glow: hk-glow 2400ms var(--ease-soft) infinite;
+  --animate-glow: hk-glow var(--dur-loop) var(--ease-soft) infinite;
   --animate-pop: hk-pop 420ms var(--ease-boing);
-  --animate-sheet: hk-sheet 340ms var(--ease-boing);
-  --animate-toast: hk-toast 240ms var(--ease-boing);
+  --animate-sheet: hk-sheet var(--dur-slow) var(--ease-boing);
+  --animate-toast: hk-toast var(--dur-base) var(--ease-boing);
   /* генерация (макет 06): точки «думаю» и бегущая полоса прогресса */
   --animate-dot: hk-dot 1100ms var(--ease-boing) infinite;
   --animate-fill: hk-fill 2600ms var(--ease-soft) infinite;
+
+  /* макет считает десктопом всё от 900 px, а не от 1024 (lg) */
+  --breakpoint-dt: 900px;
 
   @keyframes hk-dot {
     0%,
@@ -147,26 +240,249 @@
   @keyframes hk-sheet {
     from {
       transform: translateY(18px);
-      opacity: 0;
     }
     to {
       transform: translateY(0);
-      opacity: 1;
     }
   }
 
   @keyframes hk-toast {
     from {
       transform: translate(-50%, -10px);
-      opacity: 0;
     }
     to {
       transform: translate(-50%, 0);
-      opacity: 1;
     }
   }
 }
 
+/* ===================== ТОКЕНЫ ТЕМЫ (тёмная по умолчанию) ===================== */
+:root {
+  /* ---- motion ---- */
+  --dur-instant: 90ms;
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 340ms;
+  --dur-boing: 520ms;
+  --dur-loop: 2400ms;
+  --press-scale: 0.94;
+  --hover-lift: -2px;
+
+  /* ---- space ---- */
+  --space-0: 0px;
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --space-6: 20px;
+  --space-7: 24px;
+  --space-8: 32px;
+  --space-9: 40px;
+  --space-10: 48px;
+  --space-11: 64px;
+  --space-12: 80px;
+  --space-13: 96px;
+  --space-14: 128px;
+
+  /* ---- border ---- */
+  --border-1: 1px;
+  --border-2: 2px;
+  --border-3: 3px;
+  --border-chunky: 4px;
+
+  /* ---- хаос-повороты: только эти значения ---- */
+  --tilt-a: -2.5deg;
+  --tilt-b: 3deg;
+  --tilt-c: -6deg;
+
+  /* ---- бренд-акценты ---- */
+  --brand-acid: var(--color-lime-300);
+  --brand-banana: var(--color-banana-300);
+  --brand-ink: var(--color-peel-900);
+  --brand-hot: var(--color-hot-300);
+  /* знак: лайм на тёмном, чернила на светлом */
+  --brand-mark: var(--color-lime-300);
+
+  /* ---- семантика: DARK ---- */
+  --bg-base: var(--color-peel-900);
+  --bg-sunken: var(--color-peel-950);
+  --bg-raised: var(--color-peel-800);
+  --bg-overlay: rgba(6, 6, 3, 0.72);
+  --bg-overlay-strong: rgba(6, 6, 3, 0.88);
+
+  --surface-card: var(--color-peel-800);
+  --surface-card-hover: var(--color-peel-700);
+  --surface-input: var(--color-peel-700);
+  --surface-inverse: var(--color-peel-25);
+
+  --text-primary: var(--color-peel-25);
+  --text-secondary: var(--color-peel-300);
+  --text-muted: var(--color-peel-400);
+  --text-accent: var(--color-lime-300);
+  --text-inverse: var(--color-peel-900);
+  --text-on-accent: var(--color-peel-900);
+
+  --border-subtle: rgba(242, 242, 232, 0.12);
+  --border-strong: rgba(242, 242, 232, 0.28);
+  --border-accent: var(--color-lime-300);
+
+  --action-primary-bg: var(--color-lime-300);
+  --action-primary-fg: var(--color-peel-900);
+  --action-primary-hover: var(--color-lime-200);
+  --action-primary-active: var(--color-lime-400);
+  --action-secondary-bg: rgba(242, 242, 232, 0.08);
+  --action-secondary-fg: var(--color-peel-25);
+  --action-secondary-hover: rgba(242, 242, 232, 0.16);
+  --action-danger-bg: var(--color-hot-300);
+  --action-danger-fg: var(--color-peel-900);
+
+  --state-success: var(--color-lime-300);
+  --state-warning: var(--color-banana-300);
+  --state-danger: var(--color-hot-300);
+  --state-live: var(--color-hot-300);
+
+  --focus-ring: var(--color-lime-300);
+
+  --glow-lime: 0 0 24px rgba(198, 255, 46, 0.45);
+  --glow-lime-strong:
+    0 0 0 3px rgba(198, 255, 46, 0.25), 0 0 32px rgba(198, 255, 46, 0.55);
+  --glow-banana: 0 0 24px rgba(255, 226, 61, 0.45);
+  --glow-hot: 0 0 24px rgba(255, 46, 147, 0.5);
+
+  /* ---- готовые роли набора ---- */
+  --type-hero: var(--font-weight-black) var(--text-hero) / var(--leading-tight)
+    var(--font-display);
+  --type-display-1: var(--font-weight-black) var(--text-display-1) /
+    var(--leading-display) var(--font-display);
+  --type-display-2: var(--font-weight-black) var(--text-display-2) /
+    var(--leading-display) var(--font-display);
+  --type-display-3: var(--font-weight-extrabold) var(--text-display-3) /
+    var(--leading-display) var(--font-display);
+  --type-title-1: var(--font-weight-bold) var(--text-title-1) /
+    var(--leading-title) var(--font-display);
+  --type-title-2: var(--font-weight-bold) var(--text-title-2) /
+    var(--leading-title) var(--font-text);
+  --type-title-3: var(--font-weight-bold) var(--text-title-3) /
+    var(--leading-title) var(--font-text);
+  --type-body-lg: var(--font-weight-medium) var(--text-body-lg) /
+    var(--leading-body) var(--font-text);
+  --type-body: var(--font-weight-medium) var(--text-body) / var(--leading-body)
+    var(--font-text);
+  --type-body-sm: var(--font-weight-medium) var(--text-body-sm) /
+    var(--leading-body) var(--font-text);
+  --type-caption: var(--font-weight-semibold) var(--text-caption) /
+    var(--leading-body) var(--font-text);
+  --type-label: var(--font-weight-bold) var(--text-micro) / 1.2
+    var(--font-mono);
+  --type-prompt: var(--font-weight-regular) var(--text-body) /
+    var(--leading-body) var(--font-mono);
+}
+
+/* ===================== СВЕТЛАЯ ТЕМА ===================== */
+[data-theme="light"] {
+  --bg-base: var(--color-peel-25);
+  --bg-sunken: var(--color-peel-50);
+  --bg-raised: var(--color-peel-0);
+  --bg-overlay: rgba(13, 13, 7, 0.55);
+  --bg-overlay-strong: rgba(13, 13, 7, 0.72);
+
+  --surface-card: var(--color-peel-0);
+  --surface-card-hover: var(--color-peel-50);
+  --surface-input: var(--color-peel-50);
+  --surface-inverse: var(--color-peel-900);
+
+  --text-primary: var(--color-peel-900);
+  --text-secondary: var(--color-peel-500);
+  --text-muted: var(--color-peel-400);
+  --text-accent: var(--color-lime-700);
+  --text-inverse: var(--color-peel-25);
+  --text-on-accent: var(--color-peel-900);
+
+  --border-subtle: rgba(13, 13, 7, 0.12);
+  --border-strong: var(--color-peel-900);
+  --border-accent: var(--color-lime-400);
+
+  --action-primary-bg: var(--color-lime-300);
+  --action-primary-fg: var(--color-peel-900);
+  --action-primary-hover: var(--color-lime-200);
+  --action-primary-active: var(--color-lime-400);
+  --action-secondary-bg: rgba(13, 13, 7, 0.06);
+  --action-secondary-fg: var(--color-peel-900);
+  --action-secondary-hover: rgba(13, 13, 7, 0.12);
+  --action-danger-bg: var(--color-hot-500);
+  --action-danger-fg: var(--color-peel-0);
+
+  --state-success: var(--color-lime-600);
+  --state-warning: var(--color-banana-500);
+  --state-danger: var(--color-hot-500);
+  --state-live: var(--color-hot-300);
+
+  --focus-ring: var(--color-lime-500);
+
+  --brand-mark: var(--color-peel-900);
+
+  /* В светлой теме тени «стикерные»: без размытия, чернилами. */
+  --shadow-card: 6px 6px 0 var(--brand-ink);
+  --shadow-pop: 10px 10px 0 var(--brand-ink);
+  --shadow-stick: 4px 4px 0 var(--brand-ink);
+}
+
+/* Явная тёмная тема нужна для переключателя и для островков поверх игры. */
+[data-theme="dark"] {
+  --bg-base: var(--color-peel-900);
+  --bg-sunken: var(--color-peel-950);
+  --bg-raised: var(--color-peel-800);
+  --bg-overlay: rgba(6, 6, 3, 0.72);
+  --bg-overlay-strong: rgba(6, 6, 3, 0.88);
+  --surface-card: var(--color-peel-800);
+  --surface-card-hover: var(--color-peel-700);
+  --surface-input: var(--color-peel-700);
+  --surface-inverse: var(--color-peel-25);
+  --text-primary: var(--color-peel-25);
+  --text-secondary: var(--color-peel-300);
+  --text-muted: var(--color-peel-400);
+  --text-accent: var(--color-lime-300);
+  --text-inverse: var(--color-peel-900);
+  --text-on-accent: var(--color-peel-900);
+  --border-subtle: rgba(242, 242, 232, 0.12);
+  --border-strong: rgba(242, 242, 232, 0.28);
+  --border-accent: var(--color-lime-300);
+  --action-primary-bg: var(--color-lime-300);
+  --action-primary-fg: var(--color-peel-900);
+  --action-primary-hover: var(--color-lime-200);
+  --action-primary-active: var(--color-lime-400);
+  --action-secondary-bg: rgba(242, 242, 232, 0.08);
+  --action-secondary-fg: var(--color-peel-25);
+  --action-secondary-hover: rgba(242, 242, 232, 0.16);
+  --action-danger-bg: var(--color-hot-300);
+  --action-danger-fg: var(--color-peel-900);
+  --state-success: var(--color-lime-300);
+  --state-warning: var(--color-banana-300);
+  --state-danger: var(--color-hot-300);
+  --state-live: var(--color-hot-300);
+  --focus-ring: var(--color-lime-300);
+  --brand-mark: var(--color-lime-300);
+  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-pop: 0 24px 64px rgba(0, 0, 0, 0.55);
+  --shadow-stick: 4px 4px 0 var(--color-lime-600);
+}
+
+/* Мобильный веб: дисплейные ступени сжимаются, текстовые не меняются. */
+@media (max-width: 640px) {
+  :root {
+    --text-hero: 44px;
+    --text-display-1: 36px;
+    --text-display-2: 30px;
+    --text-display-3: 24px;
+    --text-title-1: 22px;
+    --text-title-2: 18px;
+    --text-title-3: 17px;
+    --tracking-display: -0.03em;
+  }
+}
+
+/* ===================== БАЗА ===================== */
 @layer base {
   html,
   body {
@@ -174,25 +490,98 @@
   }
 
   body {
-    background: var(--color-stage);
-    color: var(--color-ink);
+    background: var(--bg-sunken);
+    color: var(--text-primary);
     font-family: var(--font-text);
     -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
   }
 
   ::selection {
-    background: var(--color-acid);
-    color: var(--color-stage);
+    background: var(--color-lime-300);
+    color: var(--color-peel-900);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-acid);
+    outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
+  }
+
+  /* Прямых углов в продукте нет: минимум 6 px (radius-xs). */
+  input,
+  textarea,
+  select,
+  button {
+    border-radius: var(--radius-xs);
+  }
+
+  /* Табличные цифры в списках и метриках — правило набора. */
+  [data-metric],
+  .font-mono {
+    font-variant-numeric: tabular-nums;
   }
 }
 
+/* ===================== РОЛИ ТИПОГРАФИКИ ===================== */
 @layer utilities {
+  .type-hero {
+    font: var(--type-hero);
+    letter-spacing: var(--tracking-display);
+  }
+  .type-display-1 {
+    font: var(--type-display-1);
+    letter-spacing: var(--tracking-display);
+  }
+  .type-display-2 {
+    font: var(--type-display-2);
+    letter-spacing: var(--tracking-display);
+  }
+  .type-display-3 {
+    font: var(--type-display-3);
+    letter-spacing: var(--tracking-display);
+  }
+  .type-title-1 {
+    font: var(--type-title-1);
+    letter-spacing: var(--tracking-title);
+  }
+  .type-title-2 {
+    font: var(--type-title-2);
+    letter-spacing: var(--tracking-title);
+  }
+  .type-title-3 {
+    font: var(--type-title-3);
+    letter-spacing: var(--tracking-body);
+  }
+  .type-body-lg {
+    font: var(--type-body-lg);
+  }
+  .type-body {
+    font: var(--type-body);
+  }
+  .type-body-sm {
+    font: var(--type-body-sm);
+  }
+  .type-caption {
+    font: var(--type-caption);
+  }
+  /* мелкий моно-лейбл: капс + трекинг 0.14em */
+  .type-label {
+    font: var(--type-label);
+    letter-spacing: var(--tracking-caps);
+    text-transform: uppercase;
+  }
+  .type-prompt {
+    font: var(--type-prompt);
+  }
+
+  /* Стикерная обводка мускота — только поверх игрового кадра. */
+  .mascot-sticker {
+    filter: drop-shadow(3px 0 0 var(--color-lime-300))
+      drop-shadow(-3px 0 0 var(--color-lime-300))
+      drop-shadow(0 3px 0 var(--color-lime-300))
+      drop-shadow(0 -3px 0 var(--color-lime-300));
+  }
+
   /* Лента занимает весь экран: полосу прокрутки прячем, как в макете. */
   .feed-rail {
     scrollbar-width: none;
@@ -208,11 +597,11 @@
    * так и останется невидимым. Здесь движение есть, а видимость — сразу.
    */
   .sheet-rise {
-    animation: hk-rise 240ms var(--ease-boing);
+    animation: hk-rise var(--dur-base) var(--ease-boing);
   }
 
   .toast-drop {
-    animation: hk-drop 240ms var(--ease-boing);
+    animation: hk-drop var(--dur-base) var(--ease-boing);
   }
 
   /* Текст поверх игры читается на любом фоне (макет: text-shadow). */
@@ -228,16 +617,14 @@
    * Карточка ремикса (макет 06): тень-подложка + кислотное свечение рамки.
    * Это одно и то же box-shadow, поэтому утилитой Tailwind его не собрать.
    */
-  .remix-card {
-    box-shadow:
-      var(--shadow-pop),
-      0 0 24px rgba(198, 255, 46, 0.45);
+  .remix-card,
+  .remix-preview {
+    box-shadow: var(--shadow-pop), var(--glow-lime);
   }
 
-  .remix-preview {
-    box-shadow:
-      var(--shadow-pop),
-      0 0 24px rgba(198, 255, 46, 0.45);
+  /* В светлой теме карточка ремикса — стикер: чернила без размытия. */
+  [data-theme="light"] .remix-card {
+    box-shadow: var(--shadow-hard);
   }
 }
 
@@ -268,7 +655,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: var(--color-stage);
+  background: var(--color-peel-950);
 }
 
 @media (min-width: 900px) {
@@ -283,5 +670,14 @@
 @media (prefers-reduced-motion: reduce) {
   .feed-rail {
     scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

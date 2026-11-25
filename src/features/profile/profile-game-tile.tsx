@@ -21,7 +21,7 @@ export function ProfileGameTile({ game }: { game: GameDto }) {
     <Link
       href={`/feed/${game.gameId}`}
       aria-label={`открыть игру: ${title}`}
-      className="group relative block aspect-[9/16] overflow-hidden rounded-lg bg-peel-950 shadow-[inset_0_0_0_1px_var(--color-line)] transition-[transform,box-shadow] duration-200 ease-boing hover:-translate-y-1 hover:shadow-[inset_0_0_0_2px_var(--color-acid),0_0_24px_rgba(198,255,46,0.45)] active:scale-[0.98]"
+      className="group relative block aspect-[9/16] overflow-hidden rounded-lg bg-peel-950 shadow-[inset_0_0_0_1px_var(--color-line)] transition-[transform,box-shadow] duration-[var(--dur-base)] ease-boing hover:-translate-y-1 hover:shadow-[inset_0_0_0_2px_var(--color-acid),0_0_24px_rgba(198,255,46,0.45)] active:scale-[0.98]"
     >
       <StageBackdrop
         gameId={game.gameId}
@@ -31,11 +31,11 @@ export function ProfileGameTile({ game }: { game: GameDto }) {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] bg-[linear-gradient(to_bottom,rgba(6,6,3,0),rgba(6,6,3,0.55)_50%,rgba(6,6,3,0.93))]" />
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-[7px] p-2.5">
-        <div className="line-clamp-2 font-display text-[13px] leading-[1.15] font-extrabold tracking-[-0.02em] text-peel-25 [text-shadow:0_2px_12px_rgba(6,6,3,0.9)]">
+        <div className="line-clamp-2 font-display text-caption leading-title font-extrabold tracking-title text-peel-25 [text-shadow:0_2px_12px_rgba(6,6,3,0.9)]">
           {title}
         </div>
         {genre && (
-          <span className="w-fit rounded-pill bg-[rgba(242,242,232,0.14)] px-2 py-[3px] font-mono text-[10px] text-peel-100 backdrop-blur-[8px]">
+          <span className="w-fit rounded-pill bg-hover-strong px-2 py-[3px] font-mono text-micro text-peel-100 backdrop-blur-[8px]">
             {genre}
           </span>
         )}

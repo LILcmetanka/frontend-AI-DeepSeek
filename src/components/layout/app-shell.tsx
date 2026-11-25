@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { HooksterMark, HomeIcon, SearchIcon, UserIcon } from '@/components/ui/icons';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { logout } from '@/shared/lib/auth';
 import { useSignedIn } from '@/shared/lib/use-signed-in';
 
@@ -28,7 +29,7 @@ function isActiveHref(pathname: string, href: string): boolean {
 
 function navClass(active: boolean): string {
   return [
-    'flex h-12 items-center gap-3 rounded-md px-3.5 text-[15px] transition-colors duration-150',
+    'flex h-12 items-center gap-3 rounded-md px-3.5 text-body transition-colors duration-[var(--dur-fast)]',
     active
       ? 'bg-hover font-extrabold text-ink'
       : 'font-bold text-ink-soft hover:bg-hover hover:text-ink',
@@ -55,12 +56,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-page text-ink">
       <aside className="hidden w-[236px] flex-none flex-col gap-[26px] border-r border-line bg-page px-4 pt-6 pb-5 dt:flex">
-        <Link href="/feed" className="flex items-center gap-[9px] px-2">
-          <HooksterMark className="-mt-0.5 h-[30px] w-[30px] flex-none text-acid" />
-          <span className="font-display text-[25px] leading-none font-black tracking-[-0.045em] text-ink">
-            hookster
-          </span>
-        </Link>
+        <div className="flex items-center justify-between gap-2 px-2">
+          <Link href="/feed" className="flex items-center gap-[9px]">
+            <HooksterMark className="-mt-0.5 h-[30px] w-[30px] flex-none text-accent" />
+            <span className="font-display text-title-1 leading-none font-black tracking-[-0.045em] text-ink">
+              hookster
+            </span>
+          </Link>
+        </div>
 
         <nav className="flex flex-col gap-1">
           {NAV.map(({ href, label, Icon }) => (
@@ -71,7 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               className={navClass(isActiveHref(pathname, href))}
             >
               <Icon
-                className={`h-6 w-6 flex-none ${isActiveHref(pathname, href) ? 'text-acid' : ''}`}
+                className={`h-6 w-6 flex-none ${isActiveHref(pathname, href) ? 'text-accent' : ''}`}
               />
               {label}
             </Link>
@@ -81,7 +84,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="h-px bg-line" />
 
         <div className="flex flex-col gap-2.5">
-          <div className="px-3.5 font-mono text-[10px] font-bold tracking-[0.14em] text-ink-mute uppercase">
+          <div className="px-3.5 font-mono text-micro font-bold tracking-caps text-ink-mute uppercase">
             продолжить
           </div>
           {/*
@@ -89,20 +92,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             маршрута, который их отдаёт (`views`/`likes` — колонки в БД без
             кода чтения). Поэтому блок пустой и честно об этом пишет.
           */}
-          <p className="px-3.5 font-mono text-[11px] leading-[1.5] text-ink-mute">
+          <p className="px-3.5 font-mono text-micro leading-body text-ink-mute">
             пока пусто — сыграй первую игру
           </p>
         </div>
 
         <div className="mt-auto flex flex-col gap-2 px-3.5">
-          <div className="flex items-center justify-between font-mono text-[11px]">
+          <div className="flex items-center justify-between gap-2 font-mono text-micro">
             <Link href="/create" className="text-ink-mute transition-colors hover:text-ink">
               AI Studio
             </Link>
-            <AuthAction />
+            <div className="flex items-center gap-2.5">
+              <AuthAction />
+              {/* Переключатель темы из системы: солнце/луна, без подписи. */}
+              <ThemeToggle className="h-8 w-8" />
+            </div>
           </div>
-          <div className="pt-2 font-mono text-[11px] leading-[1.5] text-ink-mute">
-            <div className="mb-1.5 font-bold tracking-[0.14em] uppercase">
+          <div className="pt-2 font-mono text-micro leading-body text-ink-mute">
+            <div className="mb-1.5 font-bold tracking-caps uppercase">
               жми и свайпай
             </div>
             ↑ ↓ или колесо — следующая игра
@@ -164,20 +171,22 @@ function AuthAction() {
 
 function MobileNav({ pathname }: { pathname: string }) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 flex h-[66px] items-center justify-around border-t border-line bg-[rgba(6,6,3,0.72)] px-2 backdrop-blur-[14px] dt:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 flex h-[66px] items-center justify-around border-t border-line bg-overlay px-2 backdrop-blur-[14px] dt:hidden">
       {NAV.map(({ href, label, Icon }) => (
         <Link
           key={label}
           href={href}
           aria-current={isActiveHref(pathname, href) ? 'page' : undefined}
-          className={`flex h-14 min-w-16 flex-col items-center justify-center gap-1 font-mono text-[10px] font-bold tracking-[0.06em] transition-colors ${
-            isActiveHref(pathname, href) ? 'text-acid' : 'text-ink-soft hover:text-ink'
+          className={`flex h-14 min-w-16 flex-col items-center justify-center gap-1 font-mono text-micro font-bold tracking-caps transition-colors ${
+            isActiveHref(pathname, href) ? 'text-accent' : 'text-ink-soft hover:text-ink'
           }`}
         >
           <Icon className="h-6 w-6" />
           {label}
         </Link>
       ))}
+      {/* На телефоне сайдбара нет — переключатель темы живёт здесь же. */}
+      <ThemeToggle />
     </nav>
   );
 }

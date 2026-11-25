@@ -61,7 +61,7 @@ export function Onboarding({ onDone }: { onDone?: () => void }) {
   }, [close]);
 
   return (
-    <div className="absolute inset-0 z-50 grid place-items-center bg-[rgba(6,6,3,0.78)] px-4 backdrop-blur-[6px]">
+    <div className="absolute inset-0 z-50 grid place-items-center bg-overlay px-4 backdrop-blur-[6px]">
       <div
         ref={cardRef}
         role="dialog"
@@ -83,20 +83,20 @@ export function Onboarding({ onDone }: { onDone?: () => void }) {
         <div className="relative flex gap-[5px]">
           <span className="h-1 flex-1 rounded-pill bg-lime-300" />
           <span
-            className={`h-1 flex-1 rounded-pill ${step === 1 ? 'bg-lime-300' : 'bg-[rgba(242,242,232,0.2)]'}`}
+            className={`h-1 flex-1 rounded-pill ${step === 1 ? 'bg-lime-300' : 'bg-hover-strong'}`}
           />
         </div>
 
         {step === 0 ? (
           <>
             <div className="relative flex flex-col gap-3.5 pt-8">
-              <HooksterMark className="h-[52px] w-[52px] text-acid" />
-              <h2 className="font-display text-[32px] leading-[1.05] font-black tracking-[-0.04em] text-peel-25">
+              <HooksterMark className="h-[52px] w-[52px] text-accent" />
+              <h2 className="font-display text-display-3 leading-title font-black tracking-display text-peel-25">
                 игры, которые
                 <br />
                 делаешь свайпом
               </h2>
-              <p className="text-[14px] leading-[1.5] font-medium text-peel-300">
+              <p className="text-body-sm leading-body font-medium text-peel-300">
                 смотри чужие, жми ремикс, получай свою версию через пару минут
               </p>
             </div>
@@ -105,21 +105,21 @@ export function Onboarding({ onDone }: { onDone?: () => void }) {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="h-[52px] rounded-pill bg-lime-300 text-[15px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-lime-200 active:scale-[0.94]"
+                className="h-[52px] rounded-pill bg-lime-300 text-body font-extrabold text-on-acid transition-[background,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-lime-200 active:scale-[0.94]"
               >
                 начать
               </button>
               <Link
                 href="/login"
                 onClick={close}
-                className="flex h-[52px] items-center justify-center rounded-pill border-2 border-[rgba(242,242,232,0.4)] text-[15px] font-bold text-peel-25 transition-colors duration-150 hover:border-lime-300 hover:text-lime-300 active:scale-[0.94]"
+                className="flex h-[52px] items-center justify-center rounded-pill border-2 border-line-strong text-body font-bold text-peel-25 transition-colors duration-[var(--dur-fast)] hover:border-lime-300 hover:text-lime-300 active:scale-[0.94]"
               >
                 войти по почте
               </Link>
               <button
                 type="button"
                 onClick={close}
-                className="p-1.5 font-mono text-[12px] text-peel-300 transition-colors duration-150 hover:text-peel-25"
+                className="p-1.5 font-mono text-caption text-peel-300 transition-colors duration-[var(--dur-fast)] hover:text-peel-25"
               >
                 пропустить
               </button>
@@ -129,17 +129,17 @@ export function Onboarding({ onDone }: { onDone?: () => void }) {
           <>
             <div className="relative flex flex-col items-center gap-4 pt-6 text-center">
               <ChevronDownIcon className="h-[34px] w-[34px] text-lime-300" />
-              <h2 className="font-display text-[26px] leading-[1.1] font-extrabold tracking-[-0.035em] text-peel-25">
+              <h2 className="font-display text-title-1 leading-title font-extrabold tracking-display text-peel-25">
                 свайп — следующая игра
               </h2>
-              <p className="text-[14px] leading-[1.5] font-medium text-peel-100">
+              <p className="text-body-sm leading-body font-medium text-peel-100">
                 тап — играть. кнопка ремикса всегда справа
               </p>
-              <div className="mt-1 flex items-center gap-2.5 rounded-pill bg-[rgba(6,6,3,0.6)] px-3.5 py-2.5">
-                <span className="grid h-[38px] w-[38px] place-items-center rounded-pill bg-lime-300 text-peel-900">
+              <div className="mt-1 flex items-center gap-2.5 rounded-pill bg-overlay px-3.5 py-2.5">
+                <span className="grid h-[38px] w-[38px] place-items-center rounded-pill bg-lime-300 text-on-acid">
                   <WandIcon className="h-[18px] w-[18px]" />
                 </span>
-                <span className="font-mono text-[11px] font-bold tracking-[0.1em] text-peel-25 uppercase">
+                <span className="font-mono text-micro font-bold tracking-caps text-peel-25 uppercase">
                   вот эта
                 </span>
               </div>
@@ -149,7 +149,7 @@ export function Onboarding({ onDone }: { onDone?: () => void }) {
               <button
                 type="button"
                 onClick={close}
-                className="h-[52px] w-full rounded-pill bg-lime-300 text-[15px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-lime-200 active:scale-[0.94]"
+                className="h-[52px] w-full rounded-pill bg-lime-300 text-body font-extrabold text-on-acid transition-[background,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-lime-200 active:scale-[0.94]"
               >
                 поехали
               </button>

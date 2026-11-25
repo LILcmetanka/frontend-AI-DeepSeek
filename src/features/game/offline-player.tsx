@@ -58,17 +58,17 @@ export function OfflinePlayer({
       />
 
       <header className="absolute inset-x-0 top-0 z-30 flex items-center gap-2.5 bg-gradient-to-b from-[rgba(6,6,3,0.8)] to-transparent p-4">
-        <span className="rounded-pill bg-hot/20 px-3 py-1.5 font-mono text-[10px] font-bold tracking-[0.12em] text-hot-200 uppercase">
+        <span className="rounded-pill bg-danger/20 px-3 py-1.5 font-mono text-micro font-bold tracking-caps text-danger uppercase">
           офлайн
         </span>
-        <p className="scrim-text min-w-0 flex-1 truncate font-display text-[15px] font-extrabold text-peel-25">
+        <p className="scrim-text min-w-0 flex-1 truncate font-display text-body font-extrabold text-peel-25">
           {game.title}
         </p>
         <button
           type="button"
           onClick={onClose}
           aria-label="закрыть офлайн-игру"
-          className="grid h-10 w-10 flex-none place-items-center rounded-pill bg-[rgba(6,6,3,0.55)] text-peel-25 backdrop-blur-[12px] transition-[background,transform] duration-150 hover:bg-[rgba(6,6,3,0.78)] active:scale-[0.94]"
+          className="grid h-10 w-10 flex-none place-items-center rounded-md bg-overlay text-peel-25 backdrop-blur-[12px] transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-overlay-strong focus-visible:shadow-glow-strong focus-visible:outline-none active:scale-[0.94]"
         >
           <CloseIcon className="h-[18px] w-[18px]" />
         </button>

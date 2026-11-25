@@ -8,10 +8,10 @@ import {
   CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
-  HooksterFace,
   HooksterMark,
   WandIcon,
 } from '@/components/ui/icons';
+import { Mascot } from '@/components/brand/brand';
 import { GameCard } from '@/features/game/game-card';
 import { OfflinePlayer } from '@/features/game/offline-player';
 import { ConnectionLost } from '@/components/ui/connection-lost';
@@ -32,6 +32,7 @@ import {
 } from '@/shared/lib/offline-games';
 import { useGameLikes } from '@/shared/lib/use-game-likes';
 import { useOnline } from '@/shared/lib/use-online';
+import { buttonClass } from '@/components/ui/controls';
 
 /**
  * Лента как в макете «Главная · лента»: одна игра на весь экран,
@@ -225,7 +226,15 @@ export function FeedScreen() {
 
   /** «смотреть заново» на карточке конца ленты: возврат к первой игре. */
   const startOver = useCallback(() => {
-    railRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+    // Лента со `scroll-smooth`: scrollTo({behavior:'auto'}) всё равно едет
+    // плавно и на 28 карточках не успевает за 900 мс — отключаем на один прыжок.
+    const rail = railRef.current;
+    if (rail) {
+      const previous = rail.style.scrollBehavior;
+      rail.style.scrollBehavior = 'auto';
+      rail.scrollTop = 0;
+      rail.style.scrollBehavior = previous;
+    }
     setActiveIndex(0);
   }, []);
 
@@ -260,21 +269,24 @@ export function FeedScreen() {
           {showEnd && (
             <div
               data-feed-end
-              className="flex h-full w-full snap-start snap-always flex-col items-center justify-center gap-[18px] bg-peel-950 px-8 text-center"
+              className="relative flex h-full w-full snap-start snap-always flex-col items-center justify-center gap-[18px] overflow-hidden bg-peel-950 px-8 text-center"
             >
-              <span className="grid h-[76px] w-[76px] flex-none place-items-center overflow-hidden rounded-pill bg-acid">
-                <HooksterFace className="w-[57px] text-peel-900" />
-              </span>
-              <p className="font-display text-[24px] leading-[1.1] font-extrabold tracking-[-0.03em] text-peel-25">
+              {/* Мускот по системе: один на экран, обрезан краем, наклон --tilt-b. */}
+              <Mascot
+                size={132}
+                tilt="b"
+                className="absolute top-[54px] right-0 translate-x-[24%]"
+              />
+              <p className="font-display text-title-1 leading-title font-extrabold tracking-display text-peel-25">
                 на сегодня всё
               </p>
-              <p className="max-w-[300px] text-[14px] leading-[1.5] font-medium text-peel-300">
+              <p className="max-w-[300px] text-body-sm leading-body font-medium text-peel-300">
                 свежие игры подвезут к вечеру. можно пересобрать что-нибудь
                 своё прямо сейчас
               </p>
               <Link
                 href="/create"
-                className="inline-flex h-[50px] items-center justify-center gap-2 rounded-pill bg-acid px-6 text-[15px] font-extrabold text-peel-900 transition-[background,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi hover:shadow-[0_0_24px_rgba(198,255,46,0.45)] active:scale-[0.94]"
+                className={buttonClass('primary', 'lg')}
               >
                 <WandIcon className="h-[19px] w-[19px]" />
                 сделать свою игру
@@ -282,7 +294,7 @@ export function FeedScreen() {
               <button
                 type="button"
                 onClick={startOver}
-                className="rounded-pill px-4 py-2 font-mono text-[12px] text-peel-300 transition-colors duration-150 hover:text-peel-25"
+                className="rounded-pill px-4 py-2 font-mono text-caption text-peel-300 transition-colors duration-[var(--dur-fast)] hover:text-peel-25"
               >
                 смотреть заново
               </button>
@@ -295,8 +307,8 @@ export function FeedScreen() {
             href="/feed"
             className="pointer-events-auto flex flex-none items-center gap-2 dt:hidden"
           >
-            <HooksterMark className="h-[26px] w-[26px] text-acid" />
-            <span className="scrim-text font-display text-[19px] leading-none font-black tracking-[-0.045em] text-peel-25 max-[419px]:hidden">
+            <HooksterMark className="h-[26px] w-[26px] text-accent" />
+            <span className="scrim-text font-display text-title-3 leading-none font-black tracking-[-0.045em] text-peel-25 max-[419px]:hidden">
               hookster
             </span>
           </Link>
@@ -318,7 +330,7 @@ export function FeedScreen() {
                 className={
                   index === activeIndex
                     ? 'block h-5 w-[3px] rounded-pill bg-acid'
-                    : 'block h-[9px] w-[3px] rounded-pill bg-[rgba(242,242,232,0.34)]'
+                    : 'block h-[9px] w-[3px] rounded-pill bg-line-strong'
                 }
               />
             ))}
@@ -339,7 +351,7 @@ export function FeedScreen() {
             <button
               type="button"
               onClick={() => setTab('rec')}
-              className="mt-4 rounded-pill bg-acid px-5 py-2.5 text-[14px] font-extrabold text-peel-900 transition-colors hover:bg-acid-hi"
+              className={buttonClass('primary', 'md', 'mt-4')}
             >
               смотреть рекомендации
             </button>
@@ -354,7 +366,7 @@ export function FeedScreen() {
           <FrameMessage title="Лента в этом режиме доступна после входа">
             <Link
               href="/login?next=/feed"
-              className="mt-4 inline-block rounded-pill bg-acid px-5 py-2.5 text-[14px] font-extrabold text-peel-900 transition-colors hover:bg-acid-hi"
+              className={buttonClass('primary', 'md', 'mt-4')}
             >
               войти
             </Link>
@@ -363,7 +375,7 @@ export function FeedScreen() {
 
         {/* Макет 08: ответа нет вовсе — «связь пропала», а не код ошибки. */}
         {tab === 'rec' && feed.isError && isNetworkError(feed.error) && (
-          <div className="absolute inset-0 z-10 bg-peel-950/70">
+          <div className="absolute inset-0 z-10 bg-sunken/70">
             <ConnectionLost
               offlineGames={offlineGames}
               onRetry={() => void feed.refetch()}
@@ -382,7 +394,7 @@ export function FeedScreen() {
               <button
                 type="button"
                 onClick={() => void feed.refetch()}
-                className="mt-4 rounded-pill border-2 border-line-strong px-5 py-2.5 text-[14px] font-bold text-ink transition-colors hover:border-acid hover:text-acid"
+                className="mt-4 rounded-pill border-2 border-line-strong px-5 py-2.5 text-body-sm font-bold text-ink transition-colors hover:border-accent-line hover:text-accent"
               >
                 повторить
               </button>
@@ -394,7 +406,7 @@ export function FeedScreen() {
             Создайте игру в AI Studio — она появится здесь.
             <Link
               href="/create"
-              className="mt-4 inline-block rounded-pill bg-acid px-5 py-2.5 text-[14px] font-extrabold text-peel-900 transition-colors hover:bg-acid-hi"
+              className={buttonClass('primary', 'md', 'mt-4')}
             >
               открыть AI Studio
             </Link>
@@ -413,14 +425,14 @@ export function FeedScreen() {
         {!online && showCards && (
           <div
             data-offline-banner
-            className="absolute top-[68px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-pill bg-peel-25 px-4 py-2 text-[12px] font-bold whitespace-nowrap text-peel-900 shadow-pop"
+            className="absolute top-[68px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-pill bg-inverse px-4 py-2 text-caption font-bold whitespace-nowrap text-on-inverse shadow-pop"
           >
             нет сети — показываем сохранённое
           </div>
         )}
 
         {toast && (
-          <div className="animate-toast absolute top-[68px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-pill bg-peel-25 px-4 py-2.5 text-[13px] font-bold whitespace-nowrap text-peel-900 shadow-pop">
+          <div className="animate-toast absolute top-[68px] left-1/2 z-40 flex -translate-x-1/2 items-center gap-2 rounded-pill bg-inverse px-4 py-2.5 text-caption font-bold whitespace-nowrap text-on-inverse shadow-pop">
             <CheckIcon className="h-4 w-4 text-lime-600" />
             {toast}
           </div>
@@ -433,7 +445,7 @@ export function FeedScreen() {
           onClick={() => goTo(activeIndex - 1)}
           disabled={activeIndex === 0}
           aria-label="предыдущая игра"
-          className="grid h-[46px] w-[46px] place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-hover-strong active:scale-[0.94] disabled:pointer-events-none disabled:opacity-40"
+          className="grid h-[46px] w-[46px] place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-hover-strong active:scale-[0.94] disabled:pointer-events-none disabled:opacity-40"
         >
           <ChevronUpIcon className="h-[22px] w-[22px]" />
         </button>
@@ -442,7 +454,7 @@ export function FeedScreen() {
           onClick={() => goTo(activeIndex + 1)}
           disabled={activeIndex >= panelCount - 1}
           aria-label="следующая игра"
-          className="grid h-[46px] w-[46px] place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-hover-strong active:scale-[0.94] disabled:pointer-events-none disabled:opacity-40"
+          className="grid h-[46px] w-[46px] place-items-center rounded-pill bg-hover text-ink transition-[background,transform] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-hover-strong active:scale-[0.94] disabled:pointer-events-none disabled:opacity-40"
         >
           <ChevronDownIcon className="h-[22px] w-[22px]" />
         </button>
@@ -465,9 +477,9 @@ function TabButton({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`scrim-text border-b-[3px] px-px pb-[7px] text-[15px] transition-colors duration-150 ${
+      className={`scrim-text border-b-[3px] px-px pb-[7px] text-body transition-colors duration-[var(--dur-fast)] ${
         active
-          ? 'border-acid font-extrabold text-peel-25'
+          ? 'border-accent-line font-extrabold text-peel-25'
           : 'border-transparent font-bold text-[rgba(242,242,232,0.6)] hover:text-peel-25'
       }`}
     >
@@ -486,9 +498,9 @@ function FrameMessage({
   return (
     <div className="absolute inset-0 z-10 grid place-items-center px-8 text-center">
       <div className="flex max-w-[320px] flex-col items-center">
-        <p className="text-[17px] leading-[1.35] font-bold text-ink">{title}</p>
+        <p className="text-title-3 leading-body font-bold text-ink">{title}</p>
         {children && (
-          <div className="mt-2 text-[14px] leading-[1.5] text-ink-soft">
+          <div className="mt-2 text-body-sm leading-body text-ink-soft">
             {children}
           </div>
         )}

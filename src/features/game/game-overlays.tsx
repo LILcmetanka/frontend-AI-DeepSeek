@@ -54,8 +54,8 @@ export function GameOverlays({
           onClick={onLike}
           aria-label={liked ? 'убрать лайк' : 'лайк'}
           aria-pressed={liked}
-          className={`grid h-12 w-12 place-items-center rounded-pill bg-[rgba(6,6,3,0.5)] backdrop-blur-[12px] transition-[background,transform] duration-150 hover:bg-[rgba(6,6,3,0.72)] active:scale-[0.94] ${
-            liked ? 'text-hot' : 'text-peel-25'
+          className={`grid h-12 w-12 place-items-center rounded-md bg-overlay backdrop-blur-[12px] transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-overlay-strong active:scale-[0.94] focus-visible:shadow-glow-strong focus-visible:outline-none ${
+            liked ? 'text-danger' : 'text-peel-25'
           }`}
         >
           <HeartIcon
@@ -70,7 +70,7 @@ export function GameOverlays({
         aria-label="комментарии"
         title="комментарии появятся позже"
         onClick={() => onNotify('комментарии появятся позже')}
-        className="grid h-12 w-12 place-items-center rounded-pill bg-[rgba(6,6,3,0.5)] text-peel-25 backdrop-blur-[12px] transition-[background,transform] duration-150 hover:bg-[rgba(6,6,3,0.72)] active:scale-[0.94]"
+        className="grid h-12 w-12 place-items-center rounded-md bg-overlay text-peel-25 backdrop-blur-[12px] transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-overlay-strong active:scale-[0.94] focus-visible:shadow-glow-strong focus-visible:outline-none"
       >
         <CommentIcon className="h-6 w-6" />
       </button>
@@ -79,21 +79,21 @@ export function GameOverlays({
         type="button"
         onClick={() => void share()}
         aria-label="поделиться"
-        className="grid h-12 w-12 place-items-center rounded-pill bg-[rgba(6,6,3,0.5)] text-peel-25 backdrop-blur-[12px] transition-[background,transform] duration-150 hover:bg-[rgba(6,6,3,0.72)] active:scale-[0.94]"
+        className="grid h-12 w-12 place-items-center rounded-md bg-overlay text-peel-25 backdrop-blur-[12px] transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-overlay-strong active:scale-[0.94] focus-visible:shadow-glow-strong focus-visible:outline-none"
       >
         <ShareIcon className="h-[21px] w-[21px]" />
       </button>
 
       <div className="flex flex-col items-center gap-1.5 pt-1">
-        <div className="mb-1.5 h-px w-7 bg-[rgba(242,242,232,0.25)]" />
+        <div className="mb-1.5 h-px w-7 bg-line-strong" />
         <Link
           href={`/create?gameId=${gameId}`}
           aria-label="сделать ремикс"
-          className="animate-glow grid h-[60px] w-[60px] place-items-center rounded-pill bg-acid text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94]"
+          className="animate-glow grid h-[54px] w-[54px] place-items-center rounded-md bg-acid text-on-acid transition-[background,transform,box-shadow] duration-[var(--dur-fast)] hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94] focus-visible:shadow-glow-strong focus-visible:outline-none"
         >
           <WandIcon className="h-[27px] w-[27px]" />
         </Link>
-        <span className="scrim-text font-mono text-[10px] font-bold tracking-[0.12em] text-acid uppercase">
+        <span className="scrim-text font-mono text-micro font-bold tracking-caps text-accent uppercase">
           ремикс
         </span>
       </div>

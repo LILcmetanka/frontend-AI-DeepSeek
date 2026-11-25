@@ -4,6 +4,7 @@ import { HooksterFace } from '@/components/ui/icons';
 import { StageBackdrop } from '@/features/game/stage-backdrop';
 import type { GameDto } from '@/shared/api/axios-instance';
 import { authorHandle } from '@/shared/lib/author';
+import { buttonClass } from '@/components/ui/controls';
 
 /**
  * Левая колонка макета 06: исходная игра, поверх которой идёт генерация.
@@ -41,7 +42,7 @@ export function SourcePanel({
             }}
           />
 
-          <span className="absolute top-4 left-4 rounded-pill bg-[rgba(242,242,232,0.16)] px-2.5 py-[5px] font-mono text-[10px] font-bold tracking-[0.12em] text-peel-25 uppercase backdrop-blur-[8px]">
+          <span className="absolute top-4 left-4 rounded-pill bg-hover-strong px-2.5 py-[5px] font-mono text-micro font-bold tracking-caps text-peel-25 uppercase backdrop-blur-[8px]">
             исходный шаблон
           </span>
 
@@ -50,16 +51,16 @@ export function SourcePanel({
             onClick={onPick}
             disabled={locked}
             title={locked ? 'генерация уже идёт — дождись результата' : undefined}
-            className="absolute top-3 right-3 inline-flex h-9 items-center rounded-pill bg-[rgba(6,6,3,0.5)] px-3.5 font-mono text-[11px] font-bold text-peel-25 backdrop-blur-[12px] transition-[background,transform] duration-150 hover:bg-[rgba(6,6,3,0.72)] active:scale-[0.94] disabled:pointer-events-none disabled:opacity-40"
+            className="absolute top-3 right-3 inline-flex h-9 items-center rounded-pill bg-overlay px-3.5 font-mono text-micro font-bold text-peel-25 backdrop-blur-[12px] transition-[background,transform] duration-[var(--dur-fast)] hover:bg-overlay active:scale-[0.94] disabled:pointer-events-none disabled:opacity-40"
           >
             сменить
           </button>
 
           <div className="relative mt-auto flex min-w-0 flex-col gap-1.5 p-4 dt:p-[18px]">
-            <div className="scrim-title font-display text-[20px] leading-[1.08] font-extrabold tracking-[-0.03em] text-peel-25">
+            <div className="scrim-title font-display text-title-2 leading-title font-extrabold tracking-display text-peel-25">
               {game.title || 'без названия'}
             </div>
-            <div className="truncate font-mono text-[11px] text-peel-300">
+            <div className="truncate font-mono text-micro text-peel-300">
               {gameMeta(game)}
             </div>
           </div>
@@ -67,29 +68,29 @@ export function SourcePanel({
       ) : (
         <div className="relative flex flex-1 flex-col items-center justify-center gap-3.5 px-7 py-9 text-center">
           <span className="grid h-[76px] w-[76px] flex-none place-items-center rounded-pill bg-acid">
-            <HooksterFace className="w-[57px] text-peel-900" />
+            <HooksterFace className="w-[57px] text-on-acid" />
           </span>
 
           {pending ? (
-            <div className="font-display text-[20px] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink">
+            <div className="font-display text-title-2 leading-title font-extrabold tracking-display text-ink">
               загружаем игру…
             </div>
           ) : failed ? (
             <>
-              <div className="font-display text-[20px] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink">
+              <div className="font-display text-title-2 leading-title font-extrabold tracking-display text-ink">
                 игру не открыть
               </div>
-              <p className="m-0 text-[13.5px] leading-[1.5] font-medium text-ink-soft">
+              <p className="m-0 text-body-sm leading-body font-medium text-ink-soft">
                 ссылка на игру не сработала — выбери шаблон из ленты: ремикс
                 собирается поверх любой игры
               </p>
             </>
           ) : (
             <>
-              <div className="font-display text-[20px] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink">
+              <div className="font-display text-title-2 leading-title font-extrabold tracking-display text-ink">
                 нет исходной игры
               </div>
-              <p className="m-0 text-[13.5px] leading-[1.5] font-medium text-ink-soft">
+              <p className="m-0 text-body-sm leading-body font-medium text-ink-soft">
                 ремикс собирается поверх готовой игры: механика остаётся, ассеты
                 и правила собираются заново
               </p>
@@ -99,7 +100,7 @@ export function SourcePanel({
           <button
             type="button"
             onClick={onPick}
-            className="mt-1 inline-flex h-[50px] items-center justify-center gap-2 rounded-pill bg-acid px-6 text-[15px] font-extrabold text-peel-900 transition-[background,transform,box-shadow] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi hover:shadow-[0_0_24px_rgba(198,255,46,0.45)] active:scale-[0.94]"
+            className={buttonClass('primary', 'lg', 'mt-1')}
           >
             выбрать игру
           </button>

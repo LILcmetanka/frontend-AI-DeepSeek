@@ -5,8 +5,11 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { WandIcon } from '@/components/ui/icons';
 import { StageBackdrop } from '@/features/game/stage-backdrop';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Chip } from '@/components/ui/controls';
 import { getFeed, type GameDto } from '@/shared/api/axios-instance';
 import { authorHandle } from '@/shared/lib/author';
+import { buttonClass } from '@/components/ui/controls';
 
 /**
  * Поиск и каталог — макет «04 Search / Catalog».
@@ -113,12 +116,12 @@ export function SearchScreen() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="игры, авторы, теги"
-            className="w-full rounded-pill border border-line bg-raised py-3.5 pr-[18px] pl-[46px] font-mono text-[14px] text-ink transition-colors duration-150 placeholder:text-ink-mute hover:border-line-strong focus:border-lime-300 focus:shadow-[0_0_0_3px_rgba(198,255,46,0.25)] focus:outline-none"
+            className="w-full rounded-pill border border-line bg-raised py-3.5 pr-[18px] pl-[46px] font-mono text-body-sm text-ink transition-colors duration-[var(--dur-fast)] placeholder:text-ink-mute hover:border-line-strong focus:border-lime-300 focus:shadow-glow-strong focus:outline-none"
           />
         </label>
 
         <div className="flex items-center gap-3">
-          <span className="font-mono text-[12px] text-ink-mute">
+          <span className="font-mono text-caption text-ink-mute">
             {catalog.isLoading
               ? 'считаем игры…'
               : `${found.length} ${gamesWord(found.length)}`}
@@ -126,7 +129,7 @@ export function SearchScreen() {
 
           <Link
             href="/create"
-            className="ml-auto inline-flex h-[46px] flex-none items-center gap-2 rounded-pill bg-acid px-5 text-[14px] font-extrabold text-peel-900 transition-[background,transform] duration-150 hover:-translate-y-0.5 hover:bg-acid-hi active:scale-[0.94] dt:ml-0"
+            className={buttonClass('primary', 'md', 'ml-auto dt:ml-0')}
           >
             <WandIcon className="h-[19px] w-[19px]" />
             создать игру
@@ -136,33 +139,33 @@ export function SearchScreen() {
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-5 pb-24 dt:px-10">
         <div className="mb-4 flex flex-wrap gap-2">
-          <GenreChip active={genre === ''} onClick={() => setGenre('')}>
+          <Chip active={genre === ''} onClick={() => setGenre('')}>
             всё
-          </GenreChip>
+          </Chip>
           {genres.map((title) => (
-            <GenreChip
+            <Chip
               key={title}
               active={genre === title}
               onClick={() => setGenre(genre === title ? '' : title)}
             >
               {title}
-            </GenreChip>
+            </Chip>
           ))}
         </div>
 
         {catalog.isLoading && (
-          <p className="font-mono text-[13px] text-ink-mute">Собираем каталог…</p>
+          <p className="font-mono text-caption text-ink-mute">собираю каталог…</p>
         )}
 
         {catalog.isError && (
           <div className="flex flex-col items-start gap-3">
-            <p className="text-[15px] font-bold text-ink">
-              Каталог не загрузился: сервер не ответил
+            <p className="text-body font-bold text-ink">
+              каталог не загрузился: сервер не ответил
             </p>
             <button
               type="button"
               onClick={() => void catalog.refetch()}
-              className="rounded-pill border-2 border-line-strong px-5 py-2.5 text-[14px] font-bold text-ink transition-colors hover:border-acid hover:text-acid"
+              className="rounded-pill border-2 border-line-strong px-5 py-2.5 text-body-sm font-bold text-ink transition-colors hover:border-accent-line hover:text-accent"
             >
               повторить
             </button>
@@ -170,13 +173,14 @@ export function SearchScreen() {
         )}
 
         {!catalog.isLoading && !catalog.isError && found.length === 0 && (
-          <div className="flex flex-col items-start gap-2">
-            <p className="text-[15px] font-bold text-ink">Ничего не нашлось</p>
-            <p className="text-[14px] leading-[1.5] text-ink-soft">
-              {query.trim() || genre
-                ? 'Попробуйте другой запрос или сбросьте фильтр жанра.'
-                : 'В каталоге пока нет игр — создайте первую в AI Studio.'}
-            </p>
+          <EmptyState
+            title="здесь пусто"
+            text={
+              query.trim() || genre
+                ? 'попробуй другой запрос или сбрось фильтр жанра'
+                : 'в каталоге пока нет игр. собери первую в AI Studio'
+            }
+          >
             {(query.trim() !== '' || genre !== '') && (
               <button
                 type="button"
@@ -184,12 +188,12 @@ export function SearchScreen() {
                   setQuery('');
                   setGenre('');
                 }}
-                className="rounded-pill border-2 border-line-strong px-5 py-2.5 text-[14px] font-bold text-ink transition-colors hover:border-acid hover:text-acid"
+                className="rounded-pill border-2 border-line-strong px-5 py-2.5 text-body-sm font-bold text-ink transition-colors hover:border-accent-line hover:text-accent"
               >
                 сбросить
               </button>
             )}
-          </div>
+          </EmptyState>
         )}
 
         {found.length > 0 && (
@@ -203,8 +207,8 @@ export function SearchScreen() {
         )}
 
         {!catalog.isLoading && !catalog.isError && (
-          <p className="mt-5 font-mono text-[11px] leading-[1.6] text-ink-mute">
-            Поиск идёт по {games.length}
+          <p className="mt-5 font-mono text-micro leading-loose text-ink-mute">
+            поиск идёт по {games.length}
             {truncated ? '+' : ''} загруженным играм каталога: серверного поиска
             в API нет. Просмотры и метки «за сутки» в карточке не отдаются,
             поэтому фильтров по ним нет.
@@ -215,31 +219,6 @@ export function SearchScreen() {
   );
 }
 
-function GenreChip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`rounded-pill px-3.5 py-[9px] font-mono text-[12px] transition-[background,color,transform] duration-150 active:scale-[0.96] ${
-        active
-          ? 'bg-lime-300 font-bold text-peel-900'
-          : 'bg-hover text-ink-soft hover:bg-hover-strong hover:text-ink'
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
 function SearchCard({ game }: { game: GameDto }) {
   const title = game.title || 'без названия';
   const genre = game.genreTitles?.[0];
@@ -247,7 +226,7 @@ function SearchCard({ game }: { game: GameDto }) {
   return (
     <Link
       href={`/feed/${game.gameId}`}
-      className="group relative block aspect-[9/16] overflow-hidden rounded-lg bg-peel-950 shadow-[inset_0_0_0_1px_var(--color-line)] transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-[inset_0_0_0_2px_var(--color-lime-300)]"
+      className="group relative block aspect-[9/16] overflow-hidden rounded-lg bg-peel-950 shadow-[inset_0_0_0_1px_var(--color-line)] transition-[transform,box-shadow] duration-[var(--dur-base)] hover:-translate-y-1 hover:shadow-[inset_0_0_0_2px_var(--color-lime-300)]"
     >
       <StageBackdrop gameId={game.gameId} />
 
@@ -260,16 +239,16 @@ function SearchCard({ game }: { game: GameDto }) {
       />
 
       {genre && (
-        <span className="absolute top-2.5 left-2.5 rounded-pill bg-[rgba(6,6,3,0.6)] px-2 py-1 font-mono text-[9px] font-bold tracking-[0.1em] text-peel-100 uppercase">
+        <span className="absolute top-2.5 left-2.5 rounded-pill bg-overlay px-2 py-1 font-mono text-micro font-bold tracking-caps text-peel-100 uppercase">
           {genre}
         </span>
       )}
 
       <div className="absolute inset-x-0 bottom-0 flex flex-col gap-[7px] p-3">
-        <div className="scrim-text line-clamp-2 font-display text-[14px] leading-[1.15] font-extrabold tracking-[-0.02em] text-peel-25">
+        <div className="scrim-text line-clamp-2 font-display text-body-sm leading-title font-extrabold tracking-title text-peel-25">
           {title}
         </div>
-        <div className="scrim-text truncate font-mono text-[11px] font-bold text-peel-100">
+        <div className="scrim-text truncate font-mono text-micro font-bold text-peel-100">
           {authorHandle(game.authorId)}
         </div>
       </div>

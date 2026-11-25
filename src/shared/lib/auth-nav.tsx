@@ -30,9 +30,9 @@ export function AuthNav() {
     return (
       <Link
         href="/login"
-        className="ml-auto text-zinc-400 transition-colors hover:text-zinc-100"
+        className="ml-auto text-ink-soft transition-colors hover:text-ink"
       >
-        Войти
+        войти
       </Link>
     );
   }
@@ -41,7 +41,7 @@ export function AuthNav() {
     <button
       type="button"
       disabled={pending}
-      className="ml-auto text-zinc-400 transition-colors hover:text-zinc-100 disabled:opacity-50"
+      className="ml-auto text-ink-soft transition-colors hover:text-ink disabled:opacity-50"
       onClick={() => {
         setPending(true);
         void logout().finally(() => {
@@ -52,7 +52,7 @@ export function AuthNav() {
         });
       }}
     >
-      {pending ? 'Выходим…' : 'Выйти'}
+      {pending ? 'выходим…' : 'выйти'}
     </button>
   );
 }

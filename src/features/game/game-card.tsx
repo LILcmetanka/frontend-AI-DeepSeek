@@ -61,9 +61,9 @@ export function GameCard({ game, liked, onLike, onNotify }: GameCardProps) {
         <div className="flex min-w-0 flex-1 flex-col gap-[9px]">
           <div className="flex min-w-0 flex-wrap items-center gap-[9px]">
             <span className="grid h-[34px] w-[34px] flex-none place-items-center overflow-hidden rounded-pill bg-acid">
-              <HooksterFace className="w-[25px] text-peel-900" />
+              <HooksterFace className="w-[25px] text-on-acid" />
             </span>
-            <span className="scrim-text min-w-0 flex-[0_1_auto] truncate text-[15px] font-extrabold text-peel-25">
+            <span className="scrim-text min-w-0 flex-[0_1_auto] truncate text-body font-extrabold text-peel-25">
               {author}
             </span>
             {/*
@@ -75,7 +75,7 @@ export function GameCard({ game, liked, onLike, onNotify }: GameCardProps) {
               type="button"
               disabled
               title="подписки появятся, когда в API будет список авторов"
-              className="flex-none cursor-not-allowed rounded-pill border-2 border-[rgba(242,242,232,0.5)] px-[11px] py-[5px] text-[12px] font-bold text-peel-25 opacity-60"
+              className="flex-none cursor-not-allowed rounded-pill border-2 border-line-strong px-[11px] py-[5px] text-caption font-bold text-peel-25 opacity-60"
             >
               подписаться
             </button>
@@ -83,19 +83,19 @@ export function GameCard({ game, liked, onLike, onNotify }: GameCardProps) {
 
           {/* Длинное название — две строки и многоточие, иначе оно выдавит
               оверлеи и подпись за нижний край кадра. */}
-          <h2 className="scrim-title line-clamp-2 font-display text-[22px] leading-[1.06] font-extrabold tracking-[-0.03em] text-peel-25 sm:text-[23px]">
+          <h2 className="scrim-title line-clamp-2 font-display text-title-2 leading-title font-extrabold tracking-display text-peel-25 sm:text-title-2">
             {title}
           </h2>
 
           {game.description && (
-            <p className="scrim-text line-clamp-1 text-[14px] leading-[1.45] font-medium text-peel-100">
+            <p className="scrim-text line-clamp-1 text-body-sm leading-body font-medium text-peel-100">
               {game.description}
             </p>
           )}
 
           <div className="flex flex-wrap gap-1.5 pt-px">
             {genre && (
-              <span className="rounded-pill bg-[rgba(242,242,232,0.14)] px-2.5 py-[5px] font-mono text-[11px] text-peel-25 backdrop-blur-[8px]">
+              <span className="rounded-pill bg-hover-strong px-2.5 py-[5px] font-mono text-micro text-peel-25 backdrop-blur-[8px]">
                 {genre}
               </span>
             )}
